@@ -1,4 +1,7 @@
-# Claude Code local settings
+# Claude Code local testing directory (symlinked modules)
+/.claude/
+
+# Claude Code local settings (if .claude is shared)
 .claude/settings.local.json
 
 # Build artifacts

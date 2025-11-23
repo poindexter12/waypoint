@@ -1,0 +1,121 @@
+{
+  "worktree": "REPLACE_WITH_DIRECTORY_NAME",
+  "branch": "REPLACE_WITH_BRANCH_NAME",
+  "mode": "CHOOSE_ONE: main|feature|bugfix|experiment|review",
+  "created": "REPLACE_WITH_ISO8601_TIMESTAMP",
+  "description": "REPLACE_WITH_PURPOSE_DESCRIPTION"
+}
+
+EXAMPLES:
+
+Example 1 - Feature Development:
+{
+  "worktree": "myapp-feature-user-auth",
+  "branch": "feature/user-authentication",
+  "mode": "feature",
+  "created": "2025-11-23T10:30:00Z",
+  "description": "Implement OAuth2 and JWT authentication with refresh tokens"
+}
+
+Example 2 - Bug Fix:
+{
+  "worktree": "api-server-bugfix-rate-limit",
+  "branch": "bugfix/rate-limit-bypass",
+  "mode": "bugfix",
+  "created": "2025-11-23T14:15:00Z",
+  "description": "Fix rate limiting bypass in authentication endpoint (issue #427)"
+}
+
+Example 3 - Experiment:
+{
+  "worktree": "myapp-exp-graphql",
+  "branch": "exp/graphql-migration",
+  "mode": "experiment",
+  "created": "2025-11-23T09:00:00Z",
+  "description": "Evaluate GraphQL migration feasibility and performance impact"
+}
+
+Example 4 - Code Review:
+{
+  "worktree": "myapp-review-pr-543",
+  "branch": "review/pr-543-user-auth",
+  "mode": "review",
+  "created": "2025-11-23T16:45:00Z",
+  "description": "Review PR #543 - User authentication refactor"
+}
+
+Example 5 - Main/Production:
+{
+  "worktree": "myapp",
+  "branch": "main",
+  "mode": "main",
+  "created": "2025-11-23T08:00:00Z",
+  "description": "Production baseline for critical hotfixes only"
+}
+
+FIELD REFERENCE:
+
+worktree:
+  - Directory name only (not full path)
+  - Should match your worktree directory name
+  - Example: "myapp-feature-user-auth"
+
+branch:
+  - Full git branch name
+  - Must match actual git branch
+  - Example: "feature/user-authentication"
+  - Common prefixes: feature/, bugfix/, exp/, review/
+
+mode:
+  - Must be one of: main, feature, bugfix, experiment, review
+  - main: Production code, minimal changes only
+  - feature: Active development, no restrictions
+  - bugfix: Surgical fixes, focused scope
+  - experiment: Prototypes, can be messy
+  - review: Code review and analysis
+
+created:
+  - ISO 8601 format in UTC
+  - Format: YYYY-MM-DDTHH:MM:SSZ
+  - Must end with 'Z' (UTC timezone)
+  - Example: "2025-11-23T10:30:00Z"
+  - Generate with: date -u +"%Y-%m-%dT%H:%M:%SZ"
+
+description:
+  - Freeform text explaining purpose
+  - Keep to one sentence if possible
+  - Include issue numbers if applicable
+  - Can be empty string: ""
+  - Examples:
+    - "Implement OAuth2 authentication"
+    - "Fix session timeout bug (issue #427)"
+    - "Prototype new GraphQL API"
+    - ""
+
+AUTOMATED GENERATION:
+
+Instead of creating this file manually, use commands:
+  /wtm-new <branch-name> - Creates new worktree with metadata
+  /wtm-adopt - Adds metadata to existing worktree
+
+These commands auto-generate this file with correct values.
+
+VALIDATION:
+
+Valid JSON:
+  - Proper quotes (double quotes only)
+  - Comma after each field except last
+  - No trailing commas
+  - Valid UTF-8
+
+Common Mistakes:
+  ❌ Single quotes: {'worktree': 'name'}
+  ✅ Double quotes: {"worktree": "name"}
+
+  ❌ Missing comma: {"worktree": "name" "branch": "main"}
+  ✅ Comma present: {"worktree": "name", "branch": "main"}
+
+  ❌ Trailing comma: {"mode": "feature",}
+  ✅ No trailing comma: {"mode": "feature"}
+
+Validate with: jq . .ai-context.json

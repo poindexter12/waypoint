@@ -1,0 +1,310 @@
+# Worktree: REPLACE_WITH_WORKTREE_NAME
+
+**Branch:** `REPLACE_WITH_BRANCH_NAME`
+**Mode:** `REPLACE_WITH_MODE`
+**Created:** REPLACE_WITH_TIMESTAMP
+
+## Purpose
+
+REPLACE_WITH_DESCRIPTION (or "No description provided")
+
+## Mode Semantics
+
+- **main**: Minimal changes, stable work only
+  - Use for: Production code, critical hotfixes
+  - Restrictions: No experimentation, minimal scope
+  - AI Behavior: Conservative, safety-focused
+
+- **feature**: Active development, larger changes allowed
+  - Use for: New features, enhancements, most development
+  - Restrictions: None - be creative!
+  - AI Behavior: Helpful, proactive suggestions
+
+- **bugfix**: Isolated, surgical fixes only
+  - Use for: Specific bug fixes, targeted corrections
+  - Restrictions: Minimal scope, no unrelated changes
+  - AI Behavior: Focused, warns about scope creep
+
+- **experiment**: Prototypes, large swings, unsafe changes allowed
+  - Use for: POCs, technology spikes, learning
+  - Restrictions: None - can be messy
+  - AI Behavior: Aggressive suggestions, OK with rough code
+
+- **review**: Documentation, analysis, audits
+  - Use for: Code review, security audits, understanding code
+  - Restrictions: Read-only mindset
+  - AI Behavior: Analytical, critical feedback
+
+## About This Worktree
+
+This directory is an independent Git worktree attached to the main repository.
+
+- **Main repository:** REPLACE_WITH_MAIN_REPO_PATH
+- **Worktree path:** REPLACE_WITH_WORKTREE_PATH
+- **Branch:** REPLACE_WITH_BRANCH_NAME
+- **Git directory:** Linked to main repository `.git/`
+
+### What is a Git Worktree?
+
+A git worktree allows you to check out multiple branches simultaneously in separate directories. All worktrees share the same repository history but have independent working directories.
+
+**Benefits:**
+- No need to `git stash` when switching contexts
+- Work on multiple features in parallel
+- Isolated dependencies and build artifacts
+- Fast context switching (just `cd` to different directory)
+
+### Metadata Files
+
+**`.ai-context.json`** (Machine-Readable)
+- JSON format for AI tools
+- Contains: worktree, branch, mode, created, description
+- Read automatically by Claude and other AI tools
+
+**`README.working-tree.md`** (This File)
+- Human-readable documentation
+- Explains mode semantics and worktree info
+- Generated automatically by `/wtm-new` or `/wtm-adopt`
+
+## Quick Commands
+
+### View Status
+```bash
+/wtm-status
+```
+Show metadata for current worktree.
+
+### List All Worktrees
+```bash
+/wtm-list
+```
+See all worktrees in this repository with their metadata.
+
+### Remove This Worktree
+```bash
+cd REPLACE_WITH_MAIN_REPO_PATH
+/wtm-destroy REPLACE_WITH_WORKTREE_PATH
+```
+Safely remove this worktree (preserves branch).
+
+### Update Metadata
+```bash
+/wtm-adopt --description "New description"
+```
+Update mode or description for this worktree.
+
+## Workflow Tips
+
+### Switching Between Worktrees
+```bash
+# From this worktree to another
+cd ../other-worktree-name
+
+# Back to this worktree
+cd REPLACE_WITH_WORKTREE_PATH
+```
+
+### Committing Changes
+```bash
+# Normal git workflow
+git add .
+git commit -m "Your commit message"
+git push origin REPLACE_WITH_BRANCH_NAME
+```
+
+### Creating Pull Request
+```bash
+# After pushing commits
+git push origin REPLACE_WITH_BRANCH_NAME
+# Then create PR in GitHub/GitLab
+```
+
+### When Done With This Worktree
+```bash
+# 1. Ensure all changes are committed
+git status
+
+# 2. Push to remote
+git push origin REPLACE_WITH_BRANCH_NAME
+
+# 3. Create and merge PR
+
+# 4. Remove worktree
+cd REPLACE_WITH_MAIN_REPO_PATH
+/wtm-destroy REPLACE_WITH_WORKTREE_PATH
+
+# 5. Optionally delete branch after PR merge
+git branch -d REPLACE_WITH_BRANCH_NAME
+```
+
+## Related Worktrees
+
+Use `/wtm-list` to see all active worktrees for this repository.
+
+## Documentation
+
+- **Comprehensive Guide:** See `working-tree/skills/worktree-guide/REFERENCE.md`
+- **Templates:** See `working-tree/skills/worktree-guide/templates/`
+- **Strategic Guidance:** Invoke `working-tree-consultant` agent
+
+---
+
+**Auto-Generated:** This file was created automatically by the waypoint working-tree module.
+**Update:** Run `/wtm-adopt` to regenerate this file with updated information.
+
+
+EXAMPLE COMPLETE FILE (Feature Development):
+
+# Worktree: myapp-feature-user-auth
+
+**Branch:** `feature/user-authentication`
+**Mode:** `feature`
+**Created:** 2025-11-23T10:30:00Z
+
+## Purpose
+
+Implement OAuth2 and JWT authentication with refresh token support
+
+## Mode Semantics
+
+- **main**: Minimal changes, stable work only
+  - Use for: Production code, critical hotfixes
+  - Restrictions: No experimentation, minimal scope
+  - AI Behavior: Conservative, safety-focused
+
+- **feature**: Active development, larger changes allowed
+  - Use for: New features, enhancements, most development
+  - Restrictions: None - be creative!
+  - AI Behavior: Helpful, proactive suggestions
+
+- **bugfix**: Isolated, surgical fixes only
+  - Use for: Specific bug fixes, targeted corrections
+  - Restrictions: Minimal scope, no unrelated changes
+  - AI Behavior: Focused, warns about scope creep
+
+- **experiment**: Prototypes, large swings, unsafe changes allowed
+  - Use for: POCs, technology spikes, learning
+  - Restrictions: None - can be messy
+  - AI Behavior: Aggressive suggestions, OK with rough code
+
+- **review**: Documentation, analysis, audits
+  - Use for: Code review, security audits, understanding code
+  - Restrictions: Read-only mindset
+  - AI Behavior: Analytical, critical feedback
+
+## About This Worktree
+
+This directory is an independent Git worktree attached to the main repository.
+
+- **Main repository:** /Users/joe/Code/myapp
+- **Worktree path:** /Users/joe/Code/myapp-feature-user-auth
+- **Branch:** feature/user-authentication
+- **Git directory:** Linked to main repository `.git/`
+
+### What is a Git Worktree?
+
+A git worktree allows you to check out multiple branches simultaneously in separate directories. All worktrees share the same repository history but have independent working directories.
+
+**Benefits:**
+- No need to `git stash` when switching contexts
+- Work on multiple features in parallel
+- Isolated dependencies and build artifacts
+- Fast context switching (just `cd` to different directory)
+
+### Metadata Files
+
+**`.ai-context.json`** (Machine-Readable)
+- JSON format for AI tools
+- Contains: worktree, branch, mode, created, description
+- Read automatically by Claude and other AI tools
+
+**`README.working-tree.md`** (This File)
+- Human-readable documentation
+- Explains mode semantics and worktree info
+- Generated automatically by `/wtm-new` or `/wtm-adopt`
+
+## Quick Commands
+
+### View Status
+```bash
+/wtm-status
+```
+Show metadata for current worktree.
+
+### List All Worktrees
+```bash
+/wtm-list
+```
+See all worktrees in this repository with their metadata.
+
+### Remove This Worktree
+```bash
+cd /Users/joe/Code/myapp
+/wtm-destroy /Users/joe/Code/myapp-feature-user-auth
+```
+Safely remove this worktree (preserves branch).
+
+### Update Metadata
+```bash
+/wtm-adopt --description "New description"
+```
+Update mode or description for this worktree.
+
+## Workflow Tips
+
+### Switching Between Worktrees
+```bash
+# From this worktree to another
+cd ../myapp-feature-other
+
+# Back to this worktree
+cd /Users/joe/Code/myapp-feature-user-auth
+```
+
+### Committing Changes
+```bash
+# Normal git workflow
+git add .
+git commit -m "feat: add OAuth2 authentication provider"
+git push origin feature/user-authentication
+```
+
+### Creating Pull Request
+```bash
+# After pushing commits
+git push origin feature/user-authentication
+# Then create PR in GitHub/GitLab
+```
+
+### When Done With This Worktree
+```bash
+# 1. Ensure all changes are committed
+git status
+
+# 2. Push to remote
+git push origin feature/user-authentication
+
+# 3. Create and merge PR
+
+# 4. Remove worktree
+cd /Users/joe/Code/myapp
+/wtm-destroy /Users/joe/Code/myapp-feature-user-auth
+
+# 5. Optionally delete branch after PR merge
+git branch -d feature/user-authentication
+```
+
+## Related Worktrees
+
+Use `/wtm-list` to see all active worktrees for this repository.
+
+## Documentation
+
+- **Comprehensive Guide:** See `working-tree/skills/worktree-guide/REFERENCE.md`
+- **Templates:** See `working-tree/skills/worktree-guide/templates/`
+- **Strategic Guidance:** Invoke `working-tree-consultant` agent
+
+---
+
+**Auto-Generated:** This file was created automatically by the waypoint working-tree module.
+**Update:** Run `/wtm-adopt` to regenerate this file with updated information.
