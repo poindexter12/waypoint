@@ -155,6 +155,86 @@ make uninstall
 make uninstall working-tree
 ```
 
+## Testing
+
+Waypoint includes a comprehensive test suite to ensure all functionality works correctly.
+
+### Requirements
+
+- Python 3.7+
+- [uv](https://github.com/astral-sh/uv) (will be installed automatically if not present)
+
+### Running Tests
+
+```bash
+# Run the full test suite
+make -f Makefile.test test
+
+# Set up test environment only
+make -f Makefile.test setup
+
+# Clean up test environment
+make -f Makefile.test clean
+```
+
+### What Gets Tested
+
+The test suite validates:
+
+- ✅ **Installation**: Both symlink and copy modes
+- ✅ **Module-specific operations**: Installing individual modules
+- ✅ **Symlink targets**: Correct source file linking
+- ✅ **Check command**: Validates installations and detects broken links
+- ✅ **Uninstall**: Complete removal of files and directories
+- ✅ **Fix command**: Repairs missing files and broken symlinks
+- ✅ **Idempotency**: Operations can be run multiple times safely
+- ✅ **Custom directories**: Non-default CLAUDE_DIR locations
+
+### Test Output
+
+The test suite provides detailed output:
+
+```
+======================================================================
+Waypoint Test Suite
+======================================================================
+
+test_check_broken_symlink (__main__.TestCheck) ... ok
+test_check_missing_installation (__main__.TestCheck) ... ok
+test_check_valid_installation (__main__.TestCheck) ... ok
+test_install_copy_mode (__main__.TestCopyInstallation) ... ok
+...
+
+----------------------------------------------------------------------
+Ran 15 tests in 2.341s
+
+OK
+======================================================================
+✓ All tests passed
+======================================================================
+```
+
+### Test Environment
+
+- Tests run in isolated temporary directories (`/tmp/waypoint-tests`)
+- All test artifacts are automatically cleaned up
+- Tests use `uv` and a virtual environment to ensure isolation
+- No modifications are made to your actual `~/.claude/` directory
+
+### Writing New Tests
+
+When adding new modules or features, add corresponding tests to `tests/test_waypoint.py`. Follow the existing test patterns:
+
+```python
+class TestNewFeature(WaypointTestCase):
+    """Test description."""
+
+    def test_specific_behavior(self):
+        """Test that specific behavior works correctly."""
+        # Test implementation
+        pass
+```
+
 ## Development
 
 ### Adding a New Module

@@ -31,6 +31,9 @@ help:
 	@echo "  list [MOD]        Show what would be installed (dry-run)"
 	@echo "  clean             Remove local build artifacts"
 	@echo ""
+	@echo "$(GREEN)Testing:$(NC)"
+	@echo "  Run tests with:   make -f Makefile.test test"
+	@echo ""
 	@echo "$(GREEN)Available Modules:$(NC)"
 	@echo "  working-tree      Git worktree management with AI context"
 	@echo ""
@@ -62,8 +65,10 @@ ifeq ($(SELECTED_MODULES),$(MODULES))
 endif
 
 $(MODULES):
+ifeq ($(filter install,$(MAKECMDGOALS)),install)
 	@echo "$(BLUE)→ Installing module: $@$(NC)"
 	@$(MAKE) -C $@ install CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE)
+endif
 
 # Uninstall all or specific module(s)
 .PHONY: uninstall
