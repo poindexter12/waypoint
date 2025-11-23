@@ -20,8 +20,8 @@ Meta-coordinator that helps users determine the right Claude Code component type
 
 ## Don't Invoke
 
-- User explicitly specifies type: "create an agent for..." (invoke optimizer directly)
-- User is modifying existing components (invoke optimizer directly)
+- User explicitly specifies type: "create an agent for..." (invoke specialist directly)
+- User is modifying existing components (invoke specialist directly)
 - General questions about Claude Code (not claire's domain)
 
 ## Process
@@ -70,11 +70,14 @@ Meta-coordinator that helps users determine the right Claude Code component type
    - Provide examples of similar existing components
    - Recommend the best fit with clear justification
 
-5. **Delegate to Optimizer**
-   - Once type is determined, use Task tool to invoke optimizer agent
+5. **Delegate to Specialist**
+   - Once type is determined, use Task tool to invoke appropriate specialist:
+     - Agents → claire-agent-author
+     - Commands → claire-command-author
+     - Skills → claire-skill-author
    - Pass along all context and requirements gathered
-   - Let optimizer handle the actual creation
-   - Example: "Now I'll hand this off to the optimizer to create the agent..."
+   - Let specialist handle the actual creation
+   - Example: "Now I'll hand this off to the agent author to create it..."
 
 ## Provide
 
@@ -101,8 +104,11 @@ Keyword-triggered toolkit          → Skill
 **Delegation Pattern:**
 Once decided, delegate like this:
 - "Based on your needs, a [TYPE] is the best fit because [REASONING]"
-- "I'll now hand this to the optimizer agent to create it..."
-- Use Task tool with subagent_type='claude-agents-expert' (the optimizer)
+- "I'll now hand this to the [specialist] to create it..."
+- Use Task tool with appropriate subagent_type:
+  - For agents: subagent_type='claire-agent-author'
+  - For commands: subagent_type='claire-command-author'
+  - For skills: subagent_type='claire-skill-author'
 
 ## Examples
 
@@ -137,15 +143,15 @@ User: "I think I need an agent but not sure"
 Coordinator: "Let me verify that's the best fit. What will it do?
 [After discussion]
 Yes, given the complexity and context needs, an agent is right.
-I'll delegate to the optimizer to create it..."
-[Invokes optimizer via Task tool]
+I'll delegate to the agent author to create it..."
+[Invokes claire-agent-author via Task tool]
 ```
 
 ### ❌ Bad Trigger Examples
 
 ```
 User: "Create an agent for managing deployments"
-Coordinator: [DON'T INVOKE - user already specified "agent", invoke optimizer directly]
+Coordinator: [DON'T INVOKE - user already specified "agent", invoke claire-agent-author directly]
 ```
 
 ```
@@ -155,7 +161,7 @@ Coordinator: [DON'T INVOKE - general Claude question, not about creating compone
 
 ```
 User: "Fix the typo in the working-tree agent"
-Coordinator: [DON'T INVOKE - modification task, invoke optimizer directly]
+Coordinator: [DON'T INVOKE - modification task, invoke claire-agent-author directly]
 ```
 
 ## Decision Tree
@@ -164,7 +170,7 @@ Coordinator: [DON'T INVOKE - modification task, invoke optimizer directly]
 User describes a need
     ↓
 Is type specified? (agent/command/skill)
-    ↓ YES → Delegate to optimizer directly
+    ↓ YES → Delegate to appropriate specialist directly
     ↓ NO
     ↓
 Ask clarifying questions
@@ -177,7 +183,10 @@ Recommend: Command | Agent | Skill
     ↓
 Explain reasoning and trade-offs
     ↓
-Delegate to optimizer via Task tool
+Delegate to specialist via Task tool:
+- Agent → claire-agent-author
+- Command → claire-command-author
+- Skill → claire-skill-author
 ```
 
 ## Error Handling
@@ -189,9 +198,9 @@ Delegate to optimizer via Task tool
 
 ## Security
 
-- Allow: Read(claire/docs-cache/*), Task(claude-agents-expert)
-- Deny: Direct file writes (optimizer handles that)
-- Never: Create components without consulting optimizer
+- Allow: Read(claire/docs-cache/*), Task(claire-agent-author|claire-command-author|claire-skill-author)
+- Deny: Direct file writes (specialists handle that)
+- Never: Create components without consulting appropriate specialist
 
 ## Version
 

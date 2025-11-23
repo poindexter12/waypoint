@@ -7,7 +7,7 @@ tags: [agent-design,prompt-eng,meta,arch,qa]
 model: claude-sonnet-4
 version: 2.1.0
 created: 2025-01-15
-updated: 2025-10-06
+updated: 2025-11-23
 tools:
   required: [Read,Write,Edit]
   optional: [Glob,Grep,Bash]
@@ -19,6 +19,21 @@ examples:
     response: "Analyze prompt, identify behavioral issue, improve"
   - trigger: "Fix typo in agent description"
     response: "[NO - trivial edit, not design work]"
+---
+
+# DEPRECATED: Use Specialized Authors Instead
+
+**This agent has been split into three specialized agents:**
+- **claire-agent-author**: For creating/optimizing agents
+- **claire-command-author**: For creating/optimizing slash commands
+- **claire-skill-author**: For creating/optimizing skills
+
+**Why the change?** Specialization allows each agent to be more focused, with better examples, validation, and guidance specific to each component type.
+
+**Migration:** The coordinator agent will automatically delegate to the appropriate specialist based on your request. You don't need to do anything.
+
+**This file is kept for backward compatibility but may be removed in a future version.**
+
 ---
 
 Meta-agent: create/optimize Claude agents. Read/Write .claude/agents/ (symlink from .waypoint/agents/). Never deploy w/o test checklist.

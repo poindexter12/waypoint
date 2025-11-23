@@ -51,10 +51,10 @@ See [working-tree/README.md](./working-tree/README.md) for detailed documentatio
 
 ### [claire](./claire/README.md)
 
-Meta-agent system for creating and optimizing Claude Code components (agents, commands, and skills). Includes a coordinator to help decide what to build and an optimizer to create it. Automatically fetches latest official documentation to ensure best practices.
+Meta-agent system for creating and optimizing Claude Code components (agents, commands, and skills). Includes a coordinator to help decide what to build and three specialized author agents for creating each component type. Automatically fetches latest official documentation to ensure best practices.
 
 **Commands**: `/claire-fetch-docs`
-**Agents**: `@claire:coordinator`, `@claire:optimizer`
+**Agents**: `@claire:coordinator`, `@claire:agent-author`, `@claire:command-author`, `@claire:skill-author`
 **Skills**: `doc-validator`
 
 See [claire/README.md](./claire/README.md) for detailed documentation.
@@ -109,7 +109,9 @@ After installation, your Claude directory will look like:
 │   │   └── manager.md
 │   └── claire/
 │       ├── coordinator.md
-│       └── optimizer.md
+│       ├── agent-author.md
+│       ├── command-author.md
+│       └── skill-author.md
 ├── commands/
 │   ├── working-tree/
 │   │   ├── new.md
