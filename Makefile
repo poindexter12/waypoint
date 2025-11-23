@@ -1,15 +1,16 @@
 # Waypoint - Modular Claude Configuration Manager
-# Root Makefile - Delegates to module-specific Makefiles
+# Root Makefile - Handles all module operations
 
 # Configuration
 CLAUDE_DIR ?= $(HOME)/.claude
 MODE ?= symlink
-MODULES := working-tree
+MODULES := working-tree claire
 
 # Colors for output
 BLUE := \033[0;34m
 GREEN := \033[0;32m
 YELLOW := \033[0;33m
+RED := \033[0;31m
 NC := \033[0m
 
 # Default target
@@ -36,6 +37,7 @@ help:
 	@echo ""
 	@echo "$(GREEN)Available Modules:$(NC)"
 	@echo "  working-tree      Git worktree management with AI context"
+	@echo "  claire            Claude agent/command/skill optimizer with doc-fetching"
 	@echo ""
 	@echo "$(GREEN)Examples:$(NC)"
 	@echo "  make install                             Install everything to ~/.claude/"
@@ -57,6 +59,159 @@ else
 SELECTED_MODULES := $(MODULES)
 endif
 
+# Helper function to install a module
+define install_module
+	@echo "$(BLUE)→ Installing module: $(1)$(NC)"
+	@mkdir -p $(CLAUDE_DIR)/agents/$(1)
+	@mkdir -p $(CLAUDE_DIR)/commands/$(1)
+	@mkdir -p $(CLAUDE_DIR)/skills/$(1)
+	@if [ -d "$(1)/agents" ]; then \
+		for file in $(1)/agents/*.md; do \
+			[ -f "$$file" ] || continue; \
+			dest=$(CLAUDE_DIR)/agents/$(1)/$$(basename $$file); \
+			if [ "$(MODE)" = "copy" ]; then \
+				cp -f $$file $$dest; \
+				echo "$(GREEN)    ✓ Copied agent: $$(basename $$file)$(NC)"; \
+			else \
+				ln -sf $$(pwd)/$$file $$dest; \
+				echo "$(GREEN)    ✓ Linked agent: $$(basename $$file)$(NC)"; \
+			fi; \
+		done; \
+	fi
+	@if [ -d "$(1)/commands" ]; then \
+		for file in $(1)/commands/*.md; do \
+			[ -f "$$file" ] || continue; \
+			dest=$(CLAUDE_DIR)/commands/$(1)/$$(basename $$file); \
+			if [ "$(MODE)" = "copy" ]; then \
+				cp -f $$file $$dest; \
+				echo "$(GREEN)    ✓ Copied command: $$(basename $$file)$(NC)"; \
+			else \
+				ln -sf $$(pwd)/$$file $$dest; \
+				echo "$(GREEN)    ✓ Linked command: $$(basename $$file)$(NC)"; \
+			fi; \
+		done; \
+	fi
+	@if [ -d "$(1)/skills" ]; then \
+		for skilldir in $(1)/skills/*/; do \
+			[ -d "$$skilldir" ] || continue; \
+			skillname=$$(basename $$skilldir); \
+			dest=$(CLAUDE_DIR)/skills/$(1)/$$skillname; \
+			if [ "$(MODE)" = "copy" ]; then \
+				mkdir -p $$dest; \
+				cp -rf $$skilldir* $$dest/; \
+				echo "$(GREEN)    ✓ Copied skill: $$skillname$(NC)"; \
+			else \
+				ln -sf $$(pwd)/$$skilldir $$dest; \
+				echo "$(GREEN)    ✓ Linked skill: $$skillname$(NC)"; \
+			fi; \
+		done; \
+	fi
+endef
+
+# Helper function to uninstall a module
+define uninstall_module
+	@echo "$(BLUE)→ Uninstalling module: $(1)$(NC)"
+	@if [ -d "$(CLAUDE_DIR)/agents/$(1)" ]; then \
+		rm -rf $(CLAUDE_DIR)/agents/$(1); \
+		echo "$(GREEN)    ✓ Removed $(CLAUDE_DIR)/agents/$(1)$(NC)"; \
+	else \
+		echo "$(YELLOW)    - $(CLAUDE_DIR)/agents/$(1) not found$(NC)"; \
+	fi
+	@if [ -d "$(CLAUDE_DIR)/commands/$(1)" ]; then \
+		rm -rf $(CLAUDE_DIR)/commands/$(1); \
+		echo "$(GREEN)    ✓ Removed $(CLAUDE_DIR)/commands/$(1)$(NC)"; \
+	else \
+		echo "$(YELLOW)    - $(CLAUDE_DIR)/commands/$(1) not found$(NC)"; \
+	fi
+	@if [ -d "$(CLAUDE_DIR)/skills/$(1)" ]; then \
+		rm -rf $(CLAUDE_DIR)/skills/$(1); \
+		echo "$(GREEN)    ✓ Removed $(CLAUDE_DIR)/skills/$(1)$(NC)"; \
+	else \
+		echo "$(YELLOW)    - $(CLAUDE_DIR)/skills/$(1) not found$(NC)"; \
+	fi
+endef
+
+# Helper function to check a module
+define check_module
+	@echo "$(BLUE)→ Checking module: $(1)$(NC)"
+	@if [ -d "$(CLAUDE_DIR)/agents/$(1)" ]; then \
+		echo "$(GREEN)    ✓ Directory exists: agents$(NC)"; \
+	else \
+		echo "$(RED)    ✗ Directory missing: agents$(NC)"; \
+	fi
+	@if [ -d "$(CLAUDE_DIR)/commands/$(1)" ]; then \
+		echo "$(GREEN)    ✓ Directory exists: commands$(NC)"; \
+	else \
+		echo "$(RED)    ✗ Directory missing: commands$(NC)"; \
+	fi
+	@if [ -d "$(1)/agents" ]; then \
+		for file in $(1)/agents/*.md; do \
+			[ -f "$$file" ] || continue; \
+			dest=$(CLAUDE_DIR)/agents/$(1)/$$(basename $$file); \
+			if [ ! -e "$$dest" ]; then \
+				echo "$(RED)    ✗ Missing agent: $$(basename $$file)$(NC)"; \
+			elif [ "$(MODE)" = "symlink" ] && [ -L "$$dest" ]; then \
+				target=$$(readlink "$$dest"); \
+				if [ "$$target" = "$$(pwd)/$$file" ]; then \
+					echo "$(GREEN)    ✓ Valid agent: $$(basename $$file)$(NC)"; \
+				else \
+					echo "$(YELLOW)    ⚠ Wrong target agent: $$(basename $$file) → $$target$(NC)"; \
+				fi; \
+			elif [ "$(MODE)" = "symlink" ] && [ ! -L "$$dest" ]; then \
+				echo "$(YELLOW)    ⚠ Not a symlink agent: $$(basename $$file)$(NC)"; \
+			else \
+				echo "$(GREEN)    ✓ Exists agent: $$(basename $$file)$(NC)"; \
+			fi; \
+		done; \
+	fi
+	@if [ -d "$(1)/commands" ]; then \
+		for file in $(1)/commands/*.md; do \
+			[ -f "$$file" ] || continue; \
+			dest=$(CLAUDE_DIR)/commands/$(1)/$$(basename $$file); \
+			if [ ! -e "$$dest" ]; then \
+				echo "$(RED)    ✗ Missing command: $$(basename $$file)$(NC)"; \
+			elif [ "$(MODE)" = "symlink" ] && [ -L "$$dest" ]; then \
+				target=$$(readlink "$$dest"); \
+				if [ "$$target" = "$$(pwd)/$$file" ]; then \
+					echo "$(GREEN)    ✓ Valid command: $$(basename $$file)$(NC)"; \
+				else \
+					echo "$(YELLOW)    ⚠ Wrong target command: $$(basename $$file) → $$target$(NC)"; \
+				fi; \
+			elif [ "$(MODE)" = "symlink" ] && [ ! -L "$$dest" ]; then \
+				echo "$(YELLOW)    ⚠ Not a symlink command: $$(basename $$file)$(NC)"; \
+			else \
+				echo "$(GREEN)    ✓ Exists command: $$(basename $$file)$(NC)"; \
+			fi; \
+		done; \
+	fi
+endef
+
+# Helper function to list module files
+define list_module
+	@echo "$(BLUE)→ Module: $(1)$(NC)"
+	@echo "$(BLUE)  Agents → $(CLAUDE_DIR)/agents/$(1)/$(NC)"
+	@if [ -d "$(1)/agents" ]; then \
+		for file in $(1)/agents/*.md; do \
+			[ -f "$$file" ] || continue; \
+			echo "    $(MODE): $$(basename $$file)"; \
+		done; \
+	fi
+	@echo "$(BLUE)  Commands → $(CLAUDE_DIR)/commands/$(1)/$(NC)"
+	@if [ -d "$(1)/commands" ]; then \
+		for file in $(1)/commands/*.md; do \
+			[ -f "$$file" ] || continue; \
+			echo "    $(MODE): $$(basename $$file)"; \
+		done; \
+	fi
+	@echo "$(BLUE)  Skills → $(CLAUDE_DIR)/skills/$(1)/$(NC)"
+	@if [ -d "$(1)/skills" ]; then \
+		for skilldir in $(1)/skills/*/; do \
+			[ -d "$$skilldir" ] || continue; \
+			echo "    $(MODE): $$(basename $$skilldir)"; \
+		done; \
+	fi
+endef
+
 # Install all or specific module(s)
 .PHONY: install $(MODULES)
 install: $(SELECTED_MODULES)
@@ -66,16 +221,14 @@ endif
 
 $(MODULES):
 ifeq ($(filter install,$(MAKECMDGOALS)),install)
-	@echo "$(BLUE)→ Installing module: $@$(NC)"
-	@$(MAKE) -C $@ install CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE)
+	$(call install_module,$@)
 endif
 
 # Uninstall all or specific module(s)
 .PHONY: uninstall
 uninstall:
 	@$(foreach mod,$(SELECTED_MODULES),\
-		echo "$(BLUE)→ Uninstalling module: $(mod)$(NC)"; \
-		$(MAKE) -C $(mod) uninstall CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE); \
+		$(call uninstall_module,$(mod)) \
 	)
 	@echo "$(GREEN)✓ Modules uninstalled successfully$(NC)"
 
@@ -84,8 +237,7 @@ uninstall:
 check:
 	@echo "$(BLUE)Checking installation status...$(NC)"
 	@$(foreach mod,$(SELECTED_MODULES),\
-		echo "$(BLUE)→ Checking module: $(mod)$(NC)"; \
-		$(MAKE) -C $(mod) check CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE) || true; \
+		$(call check_module,$(mod)) \
 	)
 
 # Fix broken symlinks
@@ -93,8 +245,7 @@ check:
 fix:
 	@echo "$(BLUE)Repairing installations...$(NC)"
 	@$(foreach mod,$(SELECTED_MODULES),\
-		echo "$(BLUE)→ Fixing module: $(mod)$(NC)"; \
-		$(MAKE) -C $(mod) fix CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE); \
+		$(call install_module,$(mod)) \
 	)
 	@echo "$(GREEN)✓ Repairs complete$(NC)"
 
@@ -103,8 +254,7 @@ fix:
 list:
 	@echo "$(BLUE)Installation preview for: $(CLAUDE_DIR)$(NC)"
 	@$(foreach mod,$(SELECTED_MODULES),\
-		echo "$(BLUE)→ Module: $(mod)$(NC)"; \
-		$(MAKE) -C $(mod) list CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE); \
+		$(call list_module,$(mod)) \
 	)
 
 # Clean build artifacts

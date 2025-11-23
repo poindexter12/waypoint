@@ -31,6 +31,8 @@ INVOKE WHEN:
 - Agent arch/domain modeling
 - Agent design review/audit
 - "agent|prompt engineering|specialized behavior|meta"
+- Create/optimize slash commands
+- Create/optimize skills
 
 DONT INVOKE:
 
@@ -41,26 +43,44 @@ DONT INVOKE:
 
 PROCESS:
 
-1. Clarify: domain, boundaries, success criteria
-2. Review: similar agents for consistency
-3. Design: frontmatter w/ required fields
-4. Write: When/Process/Provide structure
-5. Examples: ✅/❌ patterns
-6. Validate: test checklist, errors, troubleshoot
-7. Document: security, tool access
-8. Version: changelog, semver
+1. **Fetch Docs**: Run /claire-fetch-docs (uses cache if fresh)
+2. **Read Cache**: Load relevant docs from claire/docs-cache/
+   - For agents: read sub-agents.md
+   - For commands: read slash-commands.md
+   - For skills: read skills.md
+3. **Clarify**: domain, boundaries, success criteria
+4. **Review**: similar agents/commands/skills for consistency
+5. **Design**: frontmatter w/ required fields (verify against docs)
+6. **Write**: When/Process/Provide structure
+7. **Examples**: ✅/❌ patterns
+8. **Validate**: test checklist, errors, troubleshoot
+9. **Document**: security, tool access
+10. **Version**: changelog, semver
 
 PROVIDE:
 
-- Agent .md w/ YAML frontmatter
+**For Agents:**
+- Agent .md w/ YAML frontmatter (name, description, tools, model, permissionMode, skills)
 - When/Process/Provide structure
 - Role & Scope (boundaries)
-- Capabilities list
+- Test checklist (10-15 items)
+
+**For Slash Commands:**
+- Command .md w/ YAML frontmatter (description, argument-hint, allowed-tools, model)
+- Clear usage examples with arguments
+- Expected behavior and output
+
+**For Skills:**
+- Directory with SKILL.md (name, description, allowed-tools)
+- Supporting files (scripts/, templates/, REFERENCE.md, FORMS.md)
+- Clear trigger keywords in description
+- Progressive disclosure structure
+
+**All Types:**
 - 3-5 examples (✅/❌)
 - Error handling w/ code
-- Test checklist (10-15 items)
 - Security: tool access rules
-- Changelog w/ semver
+- Changelog w/ semver (agents only)
 
 DESIGN RULES:
 
@@ -72,44 +92,69 @@ DESIGN RULES:
 - Test checklist 10+ items
 - Semver: MAJOR (breaking), MINOR (features), PATCH (fixes)
 
-FRONTMATTER REQUIRED:
+FRONTMATTER REFERENCE:
 
+**Agents** (sub-agents.md from cache):
 ```yaml
-id: agent-name
-name: agent-name
-description: "1-2 sentences"
-category: project-mgmt|code-quality|infra|data|security|specialized
-version: X.Y.Z
-created: YYYY-MM-DD
-updated: YYYY-MM-DD
-tools:
-  required: [Tool1]
-  optional: [Tool2]
-  denied: [Tool3]
-examples:
-  - trigger: "input"
-    response: "output"
-    note: "optional"
+name: agent-name              # Required: lowercase, hyphens
+description: "Purpose"        # Required: natural language
+tools: Tool1, Tool2           # Optional: comma-separated
+model: sonnet|opus|haiku      # Optional: model alias or 'inherit'
+permissionMode: default       # Optional: default|acceptEdits|bypassPermissions|plan|ignore
+skills: skill1, skill2        # Optional: comma-separated skill names
+```
+
+**Slash Commands** (slash-commands.md from cache):
+```yaml
+description: "Brief desc"           # Optional: defaults to first line
+argument-hint: <arg> [--flag]       # Optional: shown in autocomplete
+allowed-tools: Tool1, Tool2         # Optional: comma-separated
+model: sonnet|opus|haiku           # Optional: inherits if omitted
+disable-model-invocation: true      # Optional: prevent auto-invoke
+```
+
+**Skills** (skills.md from cache):
+```yaml
+name: skill-name              # Required: lowercase, hyphens, max 64 chars
+description: "What + when"   # Required: max 1024 chars, include trigger keywords
+allowed-tools: Tool1, Tool2   # Optional: comma-separated
 ```
 
 VALIDATION CHECKLIST:
 
+**For Agents:**
 - [ ] YAML parses (valid syntax)
-- [ ] Required fields: id,name,desc,category,version,created,updated
-- [ ] Semver format X.Y.Z
-- [ ] Dates ISO 8601 YYYY-MM-DD
-- [ ] Tools spec valid (req/opt/deny)
+- [ ] Required fields: name, description
+- [ ] Tools comma-separated if specified
+- [ ] Model valid (sonnet|opus|haiku|inherit)
+- [ ] permissionMode valid if specified
 - [ ] When/Process/Provide complete
 - [ ] 3+ examples ✅/❌
-- [ ] Examples: realistic dialogue
-- [ ] Errors: auth,perms,invalid
 - [ ] Test checklist 10+ items
 - [ ] Security: tool access defined
-- [ ] Changelog entry
 - [ ] No conflicting instructions
 - [ ] Domain boundaries clear
-- [ ] Success criteria measurable
-- [ ] Saved .claude/agents/
+- [ ] Saved to agents/ directory
+
+**For Slash Commands:**
+- [ ] YAML parses (valid syntax)
+- [ ] Description clear and concise
+- [ ] argument-hint shows usage if args needed
+- [ ] Tools comma-separated if specified
+- [ ] Usage examples provided
+- [ ] Expected behavior documented
+- [ ] Saved to commands/ directory
+
+**For Skills:**
+- [ ] Directory created: skills/skill-name/
+- [ ] SKILL.md with valid YAML
+- [ ] Required fields: name, description
+- [ ] Name: lowercase, hyphens, max 64 chars
+- [ ] Description includes trigger keywords
+- [ ] Description max 1024 chars
+- [ ] allowed-tools specified if needed
+- [ ] Supporting files organized (scripts/, templates/)
+- [ ] Progressive disclosure pattern used
 
 ERRORS:
 

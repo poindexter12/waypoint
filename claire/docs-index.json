@@ -1,0 +1,54 @@
+{
+  "version": "2025-11-23",
+  "docsMapUrl": "https://code.claude.com/docs/en/claude_code_docs_map.md",
+  "description": "Claude Code documentation index for automatic fetching",
+  "keyDocs": {
+    "skills": {
+      "url": "https://code.claude.com/docs/en/skills.md",
+      "description": "Skills documentation - model-invoked capabilities",
+      "lastFetched": null
+    },
+    "plugins": {
+      "url": "https://code.claude.com/docs/en/plugins.md",
+      "description": "Plugins documentation - extending Claude Code",
+      "lastFetched": null
+    },
+    "hooksGuide": {
+      "url": "https://code.claude.com/docs/en/hooks-guide.md",
+      "description": "Hooks guide - shell commands on events",
+      "lastFetched": null
+    },
+    "hooksReference": {
+      "url": "https://code.claude.com/docs/en/hooks.md",
+      "description": "Hooks reference - complete hook specification",
+      "lastFetched": null
+    },
+    "slashCommands": {
+      "url": "https://code.claude.com/docs/en/slash-commands.md",
+      "description": "Slash commands reference - custom commands",
+      "lastFetched": null
+    },
+    "subAgents": {
+      "url": "https://code.claude.com/docs/en/sub-agents.md",
+      "description": "Sub-agents documentation - specialized agents",
+      "lastFetched": null
+    },
+    "pluginsReference": {
+      "url": "https://code.claude.com/docs/en/plugins-reference.md",
+      "description": "Plugins reference - detailed plugin API",
+      "lastFetched": null
+    },
+    "statusLine": {
+      "url": "https://code.claude.com/docs/en/status-line-config.md",
+      "description": "Status line configuration",
+      "lastFetched": null
+    },
+    "cliReference": {
+      "url": "https://code.claude.com/docs/en/cli-reference.md",
+      "description": "CLI reference - command line usage",
+      "lastFetched": null
+    }
+  },
+  "cacheDir": "docs-cache",
+  "cacheLifetime": "86400"
+}

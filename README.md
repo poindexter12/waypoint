@@ -241,23 +241,25 @@ class TestNewFeature(WaypointTestCase):
 
 1. Create a directory for your module: `mkdir my-module`
 2. Add subdirectories: `mkdir my-module/agents my-module/commands`
-3. Create agent/command files as `.md` files
-4. Copy `working-tree/Makefile` and adjust `MODULE_NAME`
-5. Create `my-module/README.md` documenting your module
-6. Add module to `MODULES` list in root `Makefile`
-7. Test installation: `make install my-module`
+3. Create agent/command files as `.md` files in the respective directories
+4. Create `my-module/README.md` documenting your module
+5. Add module to `MODULES` list in root `Makefile`
+6. Test installation: `make install my-module`
+
+That's it! No module-specific Makefile needed - the root Makefile handles everything.
 
 ### Module Structure
 
 ```
 my-module/
-├── Makefile              # Module installation logic
 ├── README.md             # Module documentation
 ├── agents/
-│   └── *.md             # Agent definitions
+│   └── *.md             # Agent definitions (optional)
 └── commands/
-    └── *.md             # Command definitions
+    └── *.md             # Command definitions (optional)
 ```
+
+Modules can have just agents, just commands, or both. The root Makefile automatically discovers and installs all `.md` files in these directories.
 
 ### Testing Changes
 
@@ -272,17 +274,48 @@ make CLAUDE_DIR=/tmp/test-claude check
 make CLAUDE_DIR=/tmp/test-claude uninstall
 ```
 
-### Module Makefile Requirements
+### Slash Command and Agent File Format
 
-Each module must implement these targets:
+**Slash Command Files** (`commands/*.md`) use YAML frontmatter with these allowed fields:
 
-- `install`: Install the module
-- `uninstall`: Remove the module
-- `check`: Verify installation
-- `fix`: Repair installation
-- `list`: Show what would be installed
+- `description`: Brief description of the command (defaults to first line of prompt)
+- `argument-hint`: Arguments expected, shown during auto-completion (e.g., `<branch> [--mode <mode>]`)
+- `allowed-tools`: List of tools the command can use (inherits from conversation if not specified)
+- `model`: Specific model to use (inherits from conversation if not specified)
+- `disable-model-invocation`: Prevent SlashCommand tool from calling this command
+- Additional custom fields as needed (e.g., `agent` for delegation)
 
-See `working-tree/Makefile` for a reference implementation.
+**Agent Files** (`agents/*.md`) use YAML frontmatter with these fields:
+
+- `name` (required): Unique identifier using lowercase letters and hyphens
+- `description` (required): Natural language description of the agent's purpose
+- `tools` (optional): Comma-separated list of specific tools (inherits all if omitted)
+- `model` (optional): Model alias (`sonnet`, `opus`, `haiku`) or `inherit` (defaults to configured subagent model)
+- `permissionMode` (optional): Permission handling (`default`, `acceptEdits`, `bypassPermissions`, `plan`, `ignore`)
+- `skills` (optional): Comma-separated list of skill names to auto-load
+
+Example slash command:
+```markdown
+---
+description: Create a new git worktree with AI context
+argument-hint: <branch> [--mode <mode>] [--description "<text>"]
+agent: working-tree-manager
+---
+
+Command instructions here...
+```
+
+Example agent:
+```markdown
+---
+name: working-tree-manager
+description: Manages git worktrees with AI context tracking
+tools: Bash, Read, Write, Grep
+model: sonnet
+---
+
+You are a git worktree manager. When invoked...
+```
 
 ## Troubleshooting
 
