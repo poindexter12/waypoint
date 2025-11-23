@@ -1,0 +1,77 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read(**)",
+      "Edit(**)",
+
+      "Bash(git:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(rsync:*)",
+
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(pnpm:*)",
+      "Bash(yarn:*)",
+      "Bash(pip:*)",
+      "Bash(python:*)",
+      "Bash(bun:*)",
+      "Bash(deno:*)",
+      "Bash(cargo:*)",
+      "Bash(go:*)",
+      "Bash(java:*)",
+      "Bash(javac:*)",
+      "Bash(mvn:*)",
+      "Bash(gradle:*)",
+      "Bash(php:*)",
+      "Bash(composer:*)",
+
+      "Bash(docker:*)",
+      "Bash(docker compose:*)",
+      "Bash(kubectl:*)",
+      "Bash(helm:*)",
+      "Bash(minikube:*)",
+      "Bash(kind:*)",
+
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
+      "Bash(grep:*)",
+      "Bash(egrep:*)",
+      "Bash(fgrep:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(jq:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+
+      "Bash(gh:*)",
+      "Bash(uv:*)",
+      "Bash(pre-commit:*)",
+      "Bash(make:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+
+      "WebSearch",
+      "WebFetch"
+    ],
+    "ask": [
+      "Bash(sudo:*)",
+      "Bash(dd:*)",
+      "Bash(shred:*)",
+      "Bash(mkfs:*)",
+      "Bash(wipefs:*)",
+      "Bash(git reset:*)",
+      "Read(**/.env*)",
+      "Read(**/*.env*)",
+      "Read(**/secrets/**)"
+    ]
+  }
+}
