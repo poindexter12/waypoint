@@ -184,6 +184,25 @@ define check_module
 			fi; \
 		done; \
 	fi
+	@if [ -d "$(1)/skills" ]; then \
+		for skilldir in $(1)/skills/*/; do \
+			[ -d "$$skilldir" ] || continue; \
+			skillname=$$(basename $$skilldir); \
+			dest=$(CLAUDE_DIR)/skills/$(1)/$$skillname; \
+			if [ ! -e "$$dest" ]; then \
+				echo "$(RED)    ✗ Missing skill: $$skillname$(NC)"; \
+			elif [ "$(MODE)" = "symlink" ] && [ -L "$$dest" ]; then \
+				target=$$(readlink "$$dest"); \
+				if [ "$$target" = "$$(pwd)/$$skilldir" ]; then \
+					echo "$(GREEN)    ✓ Valid skill: $$skillname$(NC)"; \
+				else \
+					echo "$(YELLOW)    ⚠ Wrong target skill: $$skillname → $$target$(NC)"; \
+				fi; \
+			else \
+				echo "$(GREEN)    ✓ Exists skill: $$skillname$(NC)"; \
+			fi; \
+		done; \
+	fi
 endef
 
 # Helper function to list module files
@@ -227,35 +246,43 @@ endif
 # Uninstall all or specific module(s)
 .PHONY: uninstall
 uninstall:
-	@$(foreach mod,$(SELECTED_MODULES),\
-		$(call uninstall_module,$(mod)) \
-	)
+	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) uninstall-module MODULE=$(mod) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
 	@echo "$(GREEN)✓ Modules uninstalled successfully$(NC)"
+
+.PHONY: uninstall-module
+uninstall-module:
+	$(call uninstall_module,$(MODULE))
 
 # Check installation status
 .PHONY: check
 check:
 	@echo "$(BLUE)Checking installation status...$(NC)"
-	@$(foreach mod,$(SELECTED_MODULES),\
-		$(call check_module,$(mod)) \
-	)
+	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) check-module MODULE=$(mod) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
+
+.PHONY: check-module
+check-module:
+	$(call check_module,$(MODULE))
 
 # Fix broken symlinks
 .PHONY: fix
 fix:
 	@echo "$(BLUE)Repairing installations...$(NC)"
-	@$(foreach mod,$(SELECTED_MODULES),\
-		$(call install_module,$(mod)) \
-	)
+	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) fix-module MODULE=$(mod) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
 	@echo "$(GREEN)✓ Repairs complete$(NC)"
+
+.PHONY: fix-module
+fix-module:
+	$(call install_module,$(MODULE))
 
 # List what would be installed (dry-run)
 .PHONY: list
 list:
 	@echo "$(BLUE)Installation preview for: $(CLAUDE_DIR)$(NC)"
-	@$(foreach mod,$(SELECTED_MODULES),\
-		$(call list_module,$(mod)) \
-	)
+	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) list-module MODULE=$(mod) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
+
+.PHONY: list-module
+list-module:
+	$(call list_module,$(MODULE))
 
 # Clean build artifacts
 .PHONY: clean

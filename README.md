@@ -2,12 +2,12 @@
 
 **Modular, reusable Claude Code configurations for common development workflows.**
 
-Waypoint is a collection of Claude agents and commands that can be installed globally or per-project, providing consistent AI-assisted tooling across your development environment. Each module is self-contained, well-documented, and easy to install via a simple Makefile.
+Waypoint is a collection of Claude agents, commands, and skills that can be installed globally or per-project, providing consistent AI-assisted tooling across your development environment. Each module is self-contained, well-documented, and easy to install via a simple Makefile.
 
 ## Philosophy
 
 - **Modular**: Each module is independent and can be installed separately
-- **Namespaced**: Agents and commands are organized by module (e.g., `@working-tree:manager`)
+- **Namespaced**: Agents, commands, and skills are organized by module (e.g., `@working-tree:manager`)
 - **Reusable**: Clone once, use everywhere via symlinks or copies
 - **Maintainable**: Simple Makefile-based installation and management
 - **Project-agnostic**: Install globally to `~/.claude/` or per-project as needed
@@ -48,6 +48,16 @@ Git worktree management with AI context tracking. Creates isolated development e
 **Agents**: `@working-tree:manager`
 
 See [working-tree/README.md](./working-tree/README.md) for detailed documentation.
+
+### [claire](./claire/README.md)
+
+Meta-agent for creating and optimizing Claude Code components (agents, commands, and skills). Automatically fetches latest official documentation to ensure best practices.
+
+**Commands**: `/claire-fetch-docs`
+**Agents**: `@claire:optimizer`
+**Skills**: `doc-validator`
+
+See [claire/README.md](./claire/README.md) for detailed documentation.
 
 ## Installation
 
@@ -95,15 +105,24 @@ After installation, your Claude directory will look like:
 ```
 ~/.claude/
 ├── agents/
-│   └── working-tree/
-│       └── manager.md
-└── commands/
-    └── working-tree/
-        ├── new.md
-        ├── status.md
-        ├── list.md
-        ├── destroy.md
-        └── adopt.md
+│   ├── working-tree/
+│   │   └── manager.md
+│   └── claire/
+│       └── optimizer.md
+├── commands/
+│   ├── working-tree/
+│   │   ├── new.md
+│   │   ├── status.md
+│   │   ├── list.md
+│   │   ├── destroy.md
+│   │   └── adopt.md
+│   └── claire/
+│       └── fetch-docs.md
+└── skills/
+    └── claire/
+        └── doc-validator/
+            ├── SKILL.md
+            └── REFERENCE.md
 ```
 
 ## Makefile Reference
@@ -240,11 +259,12 @@ class TestNewFeature(WaypointTestCase):
 ### Adding a New Module
 
 1. Create a directory for your module: `mkdir my-module`
-2. Add subdirectories: `mkdir my-module/agents my-module/commands`
+2. Add subdirectories as needed: `mkdir my-module/agents my-module/commands my-module/skills`
 3. Create agent/command files as `.md` files in the respective directories
-4. Create `my-module/README.md` documenting your module
-5. Add module to `MODULES` list in root `Makefile`
-6. Test installation: `make install my-module`
+4. Create skills as subdirectories with a `SKILL.md` file: `my-module/skills/skill-name/SKILL.md`
+5. Create `my-module/README.md` documenting your module
+6. Add module to `MODULES` list in root `Makefile`
+7. Test installation: `make install my-module`
 
 That's it! No module-specific Makefile needed - the root Makefile handles everything.
 
@@ -255,11 +275,17 @@ my-module/
 ├── README.md             # Module documentation
 ├── agents/
 │   └── *.md             # Agent definitions (optional)
-└── commands/
-    └── *.md             # Command definitions (optional)
+├── commands/
+│   └── *.md             # Command definitions (optional)
+└── skills/
+    └── skill-name/      # Skill directories (optional)
+        ├── SKILL.md     # Required: skill definition
+        ├── REFERENCE.md # Optional: detailed documentation
+        ├── scripts/     # Optional: helper scripts
+        └── templates/   # Optional: file templates
 ```
 
-Modules can have just agents, just commands, or both. The root Makefile automatically discovers and installs all `.md` files in these directories.
+Modules can have agents, commands, skills, or any combination. The root Makefile automatically discovers and installs all files from these directories.
 
 ### Testing Changes
 
@@ -294,6 +320,12 @@ make CLAUDE_DIR=/tmp/test-claude uninstall
 - `permissionMode` (optional): Permission handling (`default`, `acceptEdits`, `bypassPermissions`, `plan`, `ignore`)
 - `skills` (optional): Comma-separated list of skill names to auto-load
 
+**Skill Files** (`skills/skill-name/SKILL.md`) use YAML frontmatter with these fields:
+
+- `name` (required): Unique identifier using lowercase letters and hyphens (max 64 chars)
+- `description` (required): Natural language description including trigger keywords (max 1024 chars)
+- `allowed-tools` (optional): Comma-separated list of tools the skill can use
+
 Example slash command:
 ```markdown
 ---
@@ -315,6 +347,19 @@ model: sonnet
 ---
 
 You are a git worktree manager. When invoked...
+```
+
+Example skill:
+```markdown
+---
+name: doc-validator
+description: Validate documentation files for completeness, accuracy, and consistency. Use when checking README files, API docs, or documentation quality.
+allowed-tools: Read, Grep, Glob
+---
+
+# Documentation Validator Skill
+
+Validates documentation files to ensure they are complete...
 ```
 
 ## Troubleshooting

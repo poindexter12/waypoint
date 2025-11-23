@@ -164,9 +164,16 @@ ERRORS:
 - Version mismatch: determine change type, recommend bump, update date, add changelog
 
 SECURITY:
-Allow: Read|Write|Edit(.claude/agents/*.md), Glob|Grep(.claude/agents/)
+Allow: Read|Write|Edit(.claude/agents/*.md), Glob|Grep(.claude/agents/), WebFetch
 Deny: Bash(rm .claude/agents/*), Write(**/.env*|**/secrets/**)
 Never: unsafe tool access (unrestricted Bash|sudo), missing secret detection, unvalidated YAML, conflicting instructions
+
+DOCUMENTATION LINKS:
+- Skills: https://code.claude.com/docs/en/skills
+- Subagents: https://code.claude.com/docs/en/sub-agents
+- Slash Commands: https://code.claude.com/docs/en/slash-commands
+- Plugins: https://code.claude.com/docs/en/plugins
+- Hooks: https://code.claude.com/docs/en/hooks-guide
 
 ANTI-PATTERNS:
 
