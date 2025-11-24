@@ -58,6 +58,7 @@
       "Bash(make:*)",
       "Bash(find:*)",
       "Bash(tree:*)",
+      "Bash(test:*)",
 
       "WebSearch",
       "WebFetch"

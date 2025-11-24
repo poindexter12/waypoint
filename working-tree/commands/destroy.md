@@ -5,191 +5,349 @@ allowed-tools: Bash, Read
 model: sonnet
 ---
 
-# /wtm-destroy - Remove Git Worktree
+# /destroy:working-tree
 
-Safely remove a git worktree directory and its metadata files. The underlying branch is preserved.
+Safely remove git worktree directory and metadata files. Branch is preserved.
 
-## Arguments
+## ARGUMENT SPECIFICATION
 
-- `<worktree-path>` (required): Path to the worktree to remove
-  - Can be absolute: `/Users/joe/myapp-feature-login`
-  - Can be relative: `../myapp-feature-login`
+```
+SYNTAX: /destroy:working-tree <worktree-path>
 
-## Usage
+REQUIRED:
+  <worktree-path>
+    Type: path (absolute or relative)
+    Validation: Must be registered git worktree
+    Examples: "../myapp-feature-login", "/Users/dev/myapp-feature-login"
+```
 
+## EXECUTION PROTOCOL
+
+Execute steps sequentially. Each step must complete successfully before proceeding.
+
+### STEP 1: VALIDATE AND RESOLVE WORKTREE PATH
+
+EXECUTE:
 ```bash
-/wtm-destroy ../myapp-feature-login
-/wtm-destroy /absolute/path/to/worktree
+# Resolve to absolute path
+if [[ "$WORKTREE_PATH_ARG" = /* ]]; then
+    WORKTREE_PATH="$WORKTREE_PATH_ARG"
+else
+    WORKTREE_PATH=$(cd "$(dirname "$WORKTREE_PATH_ARG")" && pwd)/$(basename "$WORKTREE_PATH_ARG")
+fi
 ```
 
-## Behavior
+VALIDATION:
+- IF WORKTREE_PATH_ARG is empty → ERROR PATTERN "missing-path"
+- WORKTREE_PATH must be absolute after resolution
 
-### Step 1: Validate Worktree Path
+NEXT:
+- On success → STEP 2
+- On failure → ABORT
 
-Check if path is a registered git worktree:
+### STEP 2: CHECK PATH EXISTS
+
+EXECUTE:
 ```bash
-git worktree list --porcelain
+test -e "$WORKTREE_PATH"
+EXISTS=$?
 ```
 
-Parse output and verify the provided path matches a registered worktree.
+VALIDATION:
+- IF EXISTS != 0 → ERROR PATTERN "path-not-exist"
 
-### Step 2: Safety Checks
+NEXT:
+- On EXISTS == 0 → STEP 3
+- On EXISTS != 0 → ABORT
 
-Before removal, verify:
-1. Path exists and is a directory
-2. Path is a git worktree (not just any directory)
-3. Path is not the main repository (prevent accidental main repo deletion)
+### STEP 3: GET ALL WORKTREES AND VALIDATE
 
-### Step 3: Check for Uncommitted Changes
-
+EXECUTE:
 ```bash
-cd <worktree-path>
-git status --porcelain
+WORKTREE_LIST=$(git worktree list --porcelain 2>&1)
+EXIT_CODE=$?
 ```
 
-If uncommitted changes exist:
-- **Warn user** but allow removal with `--force` flag
-- Show what changes will be lost
-- Require confirmation
+VALIDATION:
+- IF EXIT_CODE != 0 → ERROR PATTERN "git-command-failed"
 
-### Step 4: Remove Worktree
-
+PARSE WORKTREE_LIST:
 ```bash
-git worktree remove --force <worktree-path>
+# Extract all worktree paths and branches
+# Format: worktree /path\nHEAD hash\nbranch refs/heads/name\n\n
+CURRENT_MAIN=$(echo "$WORKTREE_LIST" | head -1 | cut -d' ' -f2)
+IS_MAIN_REPO=false
+
+if [ "$WORKTREE_PATH" = "$CURRENT_MAIN" ]; then
+    IS_MAIN_REPO=true
+fi
+
+# Find worktree entry for target path
+WORKTREE_ENTRY=$(echo "$WORKTREE_LIST" | grep -A 3 "^worktree $WORKTREE_PATH$")
+IS_REGISTERED=$(echo "$WORKTREE_ENTRY" | wc -l)
 ```
 
-Use `--force` to remove even with uncommitted changes (after user confirmation).
+VALIDATION:
+- IF IS_MAIN_REPO == true → ERROR PATTERN "cannot-destroy-main"
+- IF IS_REGISTERED == 0 → ERROR PATTERN "not-a-worktree"
 
-### Step 5: Clean Up Stale References
-
+DATA EXTRACTION:
 ```bash
-git worktree prune
+BRANCH_REF=$(echo "$WORKTREE_ENTRY" | grep "^branch " | cut -d' ' -f2)
+BRANCH_NAME=$(echo "$BRANCH_REF" | sed 's|refs/heads/||')
 ```
 
-Remove any stale worktree administrative files.
+NEXT:
+- On success → STEP 4
+- On failure → ABORT
 
-### Step 6: Confirm Branch Preservation
+### STEP 4: CHECK FOR UNCOMMITTED CHANGES
 
-Display message:
-```
-Worktree removed: <worktree-path>
-
-Branch '<branch-name>' has been preserved.
-
-To delete the branch as well:
-  git branch -d <branch-name>   # Safe delete (only if merged)
-  git branch -D <branch-name>   # Force delete (even if unmerged)
+EXECUTE:
+```bash
+cd "$WORKTREE_PATH"
+GIT_STATUS=$(git status --porcelain 2>&1)
+STATUS_EXIT=$?
 ```
 
-## Output Examples
+VALIDATION:
+- IF STATUS_EXIT != 0 → Warning (worktree may be corrupted, allow removal)
 
-### Example 1: Clean Removal
-
-```
-Removing worktree: /Users/joe/myapp-feature-login
-
-Checking for uncommitted changes... None found.
-Removing worktree directory... Done.
-Pruning stale references... Done.
-
-✓ Worktree removed successfully
-
-Branch 'feature/login-refactor' has been preserved.
-
-To delete the branch:
-  git branch -d feature/login-refactor
+DETECTION:
+```bash
+if [ -n "$GIT_STATUS" ]; then
+    HAS_CHANGES=true
+else
+    HAS_CHANGES=false
+fi
 ```
 
-### Example 2: Uncommitted Changes Warning
+ACTION:
+- IF HAS_CHANGES == false → STEP 5 (proceed directly)
+- IF HAS_CHANGES == true → Display warning, ask user confirmation
 
+USER DECISION (if HAS_CHANGES == true):
 ```
-Removing worktree: /Users/joe/myapp-bugfix-auth
-
 ⚠ Warning: Uncommitted changes detected
 
 Modified files:
-  M src/auth.ts
-  M tests/auth.test.ts
-
-?? new-file.ts
+{GIT_STATUS output}
 
 These changes will be lost if you proceed.
 
 Recommendations:
-  1. Commit changes: cd /Users/joe/myapp-bugfix-auth && git commit -am "message"
-  2. Stash changes: cd /Users/joe/myapp-bugfix-auth && git stash
+  1. Commit changes: cd {WORKTREE_PATH} && git commit -am "message"
+  2. Stash changes: cd {WORKTREE_PATH} && git stash
   3. Proceed anyway (changes will be lost)
 
 Proceed with removal? (This will permanently delete uncommitted work)
-[Requires user confirmation via AskUserQuestion or similar]
-
-If confirmed:
-  Removing worktree... Done.
-  ✓ Worktree removed (uncommitted changes were discarded)
 ```
 
-### Example 3: Main Repository Protection
+Use AskUserQuestion:
+- Option 1: "Cancel removal" → TERMINATE (no changes)
+- Option 2: "Proceed with removal (discard changes)" → STEP 5
 
-```
-Error: Cannot destroy main repository
+NEXT:
+- IF user cancels → TERMINATE
+- IF user proceeds OR no changes → STEP 5
 
-The path '/Users/joe/myapp' is the main repository, not a worktree.
+### STEP 5: REMOVE WORKTREE
 
-To remove worktrees, use paths like:
-  /wtm-destroy ../myapp-feature-branch
-  /wtm-destroy ../myapp-bugfix-something
-
-To see all worktrees:
-  /wtm-list
-```
-
-## Error Handling
-
-### Path Not a Worktree
-```
-Error: Not a registered git worktree
-
-Path: <provided-path>
-
-This path is not a git worktree. To see all worktrees:
-  /wtm-list
-
-Valid worktree paths look like:
-  /Users/joe/myapp-feature-login
-  ../myapp-bugfix-auth
+EXECUTE:
+```bash
+git worktree remove --force "$WORKTREE_PATH" 2>&1
+EXIT_CODE=$?
 ```
 
-### Path Doesn't Exist
+VALIDATION:
+- IF EXIT_CODE != 0 → ERROR PATTERN "worktree-removal-failed"
+
+NEXT:
+- On success → STEP 6
+- On failure → ABORT
+
+### STEP 6: PRUNE STALE REFERENCES
+
+EXECUTE:
+```bash
+git worktree prune 2>&1
+EXIT_CODE=$?
 ```
-Error: Path does not exist
 
-Path: <provided-path>
+VALIDATION:
+- IF EXIT_CODE != 0 → Warning (not fatal, removal succeeded)
 
-The specified path doesn't exist. Check for typos.
+NEXT:
+- On success → STEP 7
+- On warning → STEP 7 (continue)
 
-To list existing worktrees:
-  /wtm-list
+### STEP 7: OUTPUT SUCCESS SUMMARY
+
+OUTPUT FORMAT (exact):
+```
+✓ Worktree removed successfully
+
+  Path: {WORKTREE_PATH}
+  Branch: {BRANCH_NAME}
+
+Branch '{BRANCH_NAME}' has been preserved.
+
+To delete the branch as well:
+  git branch -d {BRANCH_NAME}   # Safe delete (only if merged)
+  git branch -D {BRANCH_NAME}   # Force delete (even if unmerged)
+
+To delete remote branch:
+  git push origin --delete {BRANCH_NAME}
 ```
 
-### No Path Provided
+SUBSTITUTIONS:
+- {WORKTREE_PATH} = from STEP 1
+- {BRANCH_NAME} = from STEP 3
+
+NEXT:
+- TERMINATE (success)
+
+## ERROR PATTERNS
+
+### PATTERN: missing-path
+
+DETECTION:
+- TRIGGER: WORKTREE_PATH_ARG is empty (no argument provided)
+
+RESPONSE (exact):
 ```
 Error: Missing worktree path
 
 Usage:
-  /wtm-destroy <worktree-path>
+  /destroy:working-tree <worktree-path>
 
 Example:
-  /wtm-destroy ../myapp-feature-login
+  /destroy:working-tree ../myapp-feature-login
 
 To see all worktrees:
-  /wtm-list
+  /list:working-tree
 ```
 
-### Git Command Failed
+CONTROL FLOW:
+- ABORT: true
+- CLEANUP: none
+- RETRY: false
+
+### PATTERN: path-not-exist
+
+DETECTION:
+- TRIGGER: Provided path does not exist (STEP 2)
+
+RESPONSE (exact):
+```
+Error: Path does not exist
+
+Path: {WORKTREE_PATH}
+
+The specified path doesn't exist. Check for typos.
+
+To list existing worktrees:
+  /list:working-tree
+```
+
+TEMPLATE SUBSTITUTIONS:
+- {WORKTREE_PATH} = provided path
+
+CONTROL FLOW:
+- ABORT: true
+- CLEANUP: none
+- RETRY: false
+
+### PATTERN: git-command-failed
+
+DETECTION:
+- TRIGGER: git worktree list command fails (STEP 3)
+- CAPTURE: stderr from git command
+
+RESPONSE (exact):
+```
+Error: Failed to list worktrees
+
+Git error: {GIT_STDERR}
+
+Check that:
+  - You're in a git repository
+  - Git is installed and working
+```
+
+TEMPLATE SUBSTITUTIONS:
+- {GIT_STDERR} = captured stderr
+
+CONTROL FLOW:
+- ABORT: true
+- CLEANUP: none
+- RETRY: false
+
+### PATTERN: cannot-destroy-main
+
+DETECTION:
+- TRIGGER: Target path matches main repository path (STEP 3)
+
+RESPONSE (exact):
+```
+Error: Cannot destroy main repository
+
+The path '{WORKTREE_PATH}' is the main repository, not a worktree.
+
+To remove worktrees, use paths like:
+  /destroy:working-tree ../myapp-feature-branch
+  /destroy:working-tree ../myapp-bugfix-something
+
+To see all worktrees:
+  /list:working-tree
+```
+
+TEMPLATE SUBSTITUTIONS:
+- {WORKTREE_PATH} = main repository path
+
+CONTROL FLOW:
+- ABORT: true
+- CLEANUP: none
+- RETRY: false
+
+### PATTERN: not-a-worktree
+
+DETECTION:
+- TRIGGER: Path exists but is not registered as git worktree (STEP 3)
+
+RESPONSE (exact):
+```
+Error: Not a registered git worktree
+
+Path: {WORKTREE_PATH}
+
+This path is not a git worktree. To see all worktrees:
+  /list:working-tree
+
+Valid worktree paths look like:
+  /Users/dev/myapp-feature-login
+  ../myapp-bugfix-auth
+```
+
+TEMPLATE SUBSTITUTIONS:
+- {WORKTREE_PATH} = provided path
+
+CONTROL FLOW:
+- ABORT: true
+- CLEANUP: none
+- RETRY: false
+
+### PATTERN: worktree-removal-failed
+
+DETECTION:
+- TRIGGER: git worktree remove fails (STEP 5)
+- CAPTURE: stderr from git worktree remove
+
+RESPONSE (exact):
 ```
 Error: Failed to remove worktree
 
-Git error: <error message>
+Git error: {GIT_STDERR}
 
 This can happen if:
   - Worktree is locked
@@ -202,17 +360,285 @@ Try:
   - Manually remove directory and run: git worktree prune
 ```
 
-## Safety Features
+TEMPLATE SUBSTITUTIONS:
+- {GIT_STDERR} = captured stderr
 
-### Protected Operations
-- Cannot remove main repository
-- Warns about uncommitted changes
-- Requires confirmation for destructive operations
-- Preserves branch by default
+CONTROL FLOW:
+- ABORT: true
+- CLEANUP: none
+- RETRY: false
 
-### Branch Deletion Guidance
+## TOOL PERMISSION MATRIX
 
-After removal, if user wants to delete the branch too:
+| Tool | Pattern | Permission | Pre-Check | Post-Check | On-Deny-Action |
+|------|---------|------------|-----------|------------|----------------|
+| Bash | git worktree:* | ALLOW | command_safe | validate_output | N/A |
+| Bash | git status:* | ALLOW | command_safe | N/A | N/A |
+| Bash | git branch:* | DENY | N/A | N/A | ABORT "Cannot delete branches automatically" |
+| Bash | cd:* | ALLOW | N/A | N/A | N/A |
+| Bash | test:* | ALLOW | N/A | N/A | N/A |
+| Bash | pwd:* | ALLOW | N/A | N/A | N/A |
+| Bash | dirname:* | ALLOW | N/A | N/A | N/A |
+| Bash | basename:* | ALLOW | N/A | N/A | N/A |
+| Bash | grep:* | ALLOW | N/A | N/A | N/A |
+| Bash | sed:* | ALLOW | N/A | N/A | N/A |
+| Bash | cut:* | ALLOW | N/A | N/A | N/A |
+| Bash | wc:* | ALLOW | N/A | N/A | N/A |
+| Bash | head:* | ALLOW | N/A | N/A | N/A |
+| Bash | rm:* | DENY | N/A | N/A | ABORT "Use git worktree remove" |
+| Bash | sudo:* | DENY | N/A | N/A | ABORT "Elevated privileges" |
+| Read | * | DENY | N/A | N/A | ABORT "Destroy is read-only except git" |
+| Write | * | DENY | N/A | N/A | ABORT "Destroy does not write files" |
+
+SECURITY CONSTRAINTS:
+- Can ONLY remove worktrees via git worktree remove
+- CANNOT delete branches (user must do manually)
+- CANNOT use rm/rmdir (git manages removal)
+- MUST check for uncommitted changes
+- MUST prevent main repository deletion
+
+## TEST CASES
+
+### TC001: Remove worktree with no uncommitted changes
+
+PRECONDITIONS:
+- Worktree exists at /Users/dev/myapp-feature-login
+- Branch: feature/login
+- No uncommitted changes
+- Not the main repository
+
+INPUT:
+```
+/destroy:working-tree /Users/dev/myapp-feature-login
+```
+
+EXPECTED EXECUTION FLOW:
+1. STEP 1 → WORKTREE_PATH="/Users/dev/myapp-feature-login"
+2. STEP 2 → EXISTS=0 (path exists)
+3. STEP 3 → IS_MAIN_REPO=false, IS_REGISTERED>0, BRANCH_NAME="feature/login"
+4. STEP 4 → HAS_CHANGES=false (no uncommitted changes)
+5. STEP 5 → git worktree remove succeeds
+6. STEP 6 → git worktree prune succeeds
+7. STEP 7 → Output summary
+
+EXPECTED OUTPUT:
+```
+✓ Worktree removed successfully
+
+  Path: /Users/dev/myapp-feature-login
+  Branch: feature/login
+
+Branch 'feature/login' has been preserved.
+
+To delete the branch as well:
+  git branch -d feature/login   # Safe delete (only if merged)
+  git branch -D feature/login   # Force delete (even if unmerged)
+
+To delete remote branch:
+  git push origin --delete feature/login
+```
+
+VALIDATION COMMANDS:
+```bash
+# Verify worktree no longer exists
+test ! -e /Users/dev/myapp-feature-login && echo "PASS" || echo "FAIL"
+
+# Verify branch still exists
+git show-ref --verify refs/heads/feature/login && echo "PASS" || echo "FAIL"
+
+# Verify not in worktree list
+git worktree list | grep -v "feature-login" && echo "PASS" || echo "FAIL"
+```
+
+### TC002: Remove worktree with uncommitted changes - user proceeds
+
+PRECONDITIONS:
+- Worktree exists at /Users/dev/myapp-bugfix-auth
+- Has uncommitted changes: Modified src/auth.ts
+
+INPUT:
+```
+/destroy:working-tree /Users/dev/myapp-bugfix-auth
+```
+
+EXPECTED EXECUTION FLOW:
+1-3. Standard detection
+4. STEP 4 → HAS_CHANGES=true
+5. Display warning with git status output
+6. USER SELECTS "Proceed with removal (discard changes)"
+7. STEP 5 → git worktree remove --force succeeds
+8. STEP 6-7 → Standard cleanup and output
+
+EXPECTED OUTPUT (includes warning):
+```
+⚠ Warning: Uncommitted changes detected
+
+Modified files:
+ M src/auth.ts
+
+These changes will be lost if you proceed.
+
+Recommendations:
+  1. Commit changes: cd /Users/dev/myapp-bugfix-auth && git commit -am "message"
+  2. Stash changes: cd /Users/dev/myapp-bugfix-auth && git stash
+  3. Proceed anyway (changes will be lost)
+
+Proceed with removal? (This will permanently delete uncommitted work)
+
+[User confirms]
+
+✓ Worktree removed successfully
+
+  Path: /Users/dev/myapp-bugfix-auth
+  Branch: bugfix/auth
+
+Branch 'bugfix/auth' has been preserved.
+
+To delete the branch as well:
+  git branch -d bugfix/auth   # Safe delete (only if merged)
+  git branch -D bugfix/auth   # Force delete (even if unmerged)
+
+To delete remote branch:
+  git push origin --delete bugfix/auth
+```
+
+### TC003: Remove worktree with uncommitted changes - user cancels
+
+PRECONDITIONS:
+- Worktree with uncommitted changes
+
+INPUT:
+```
+/destroy:working-tree /Users/dev/myapp-feature-test
+```
+
+EXPECTED EXECUTION FLOW:
+1-4. Detect changes
+5. Display warning
+6. USER SELECTS "Cancel removal"
+7. TERMINATE (no changes)
+
+EXPECTED OUTPUT:
+```
+⚠ Warning: Uncommitted changes detected
+
+[warning displayed]
+
+Proceed with removal?
+
+[User cancels]
+
+Removal cancelled. No changes made.
+```
+
+POSTCONDITIONS:
+- Worktree still exists
+- No files modified
+
+### TC004: Attempt to destroy main repository
+
+PRECONDITIONS:
+- Main repository at /Users/dev/myapp
+
+INPUT:
+```
+/destroy:working-tree /Users/dev/myapp
+```
+
+EXPECTED EXECUTION FLOW:
+1. STEP 1 → Resolve path
+2. STEP 2 → Path exists
+3. STEP 3 → IS_MAIN_REPO=true
+4. ERROR PATTERN "cannot-destroy-main"
+5. ABORT
+
+EXPECTED OUTPUT:
+```
+Error: Cannot destroy main repository
+
+The path '/Users/dev/myapp' is the main repository, not a worktree.
+
+To remove worktrees, use paths like:
+  /destroy:working-tree ../myapp-feature-branch
+  /destroy:working-tree ../myapp-bugfix-something
+
+To see all worktrees:
+  /list:working-tree
+```
+
+POSTCONDITIONS:
+- Main repository untouched
+- No changes made
+
+### TC005: Path does not exist
+
+PRECONDITIONS:
+- Path /Users/dev/nonexistent does not exist
+
+INPUT:
+```
+/destroy:working-tree /Users/dev/nonexistent
+```
+
+EXPECTED EXECUTION FLOW:
+1. STEP 1 → Resolve path
+2. STEP 2 → EXISTS=1 (does not exist)
+3. ERROR PATTERN "path-not-exist"
+4. ABORT
+
+EXPECTED OUTPUT:
+```
+Error: Path does not exist
+
+Path: /Users/dev/nonexistent
+
+The specified path doesn't exist. Check for typos.
+
+To list existing worktrees:
+  /list:working-tree
+```
+
+### TC006: Not a git worktree
+
+PRECONDITIONS:
+- Directory /Users/dev/random-dir exists but is not a git worktree
+
+INPUT:
+```
+/destroy:working-tree /Users/dev/random-dir
+```
+
+EXPECTED EXECUTION FLOW:
+1-2. Resolve and verify path exists
+3. STEP 3 → IS_REGISTERED=0 (not in worktree list)
+4. ERROR PATTERN "not-a-worktree"
+5. ABORT
+
+EXPECTED OUTPUT:
+```
+Error: Not a registered git worktree
+
+Path: /Users/dev/random-dir
+
+This path is not a git worktree. To see all worktrees:
+  /list:working-tree
+
+Valid worktree paths look like:
+  /Users/dev/myapp-feature-login
+  ../myapp-bugfix-auth
+```
+
+## SAFETY FEATURES
+
+### PROTECTED OPERATIONS
+- CANNOT remove main repository
+- WARNS about uncommitted changes
+- REQUIRES confirmation for destructive operations
+- PRESERVES branch by default
+
+### BRANCH DELETION GUIDANCE
+
+Command provides guidance but NEVER auto-deletes branches:
 
 **Safe delete** (only if merged):
 ```bash
@@ -229,20 +655,19 @@ git branch -D <branch-name>
 git push origin --delete <branch-name>
 ```
 
-## Implementation Notes
+## RELATED COMMANDS
 
-- Always validate path is a worktree using `git worktree list`
-- Always check for uncommitted changes before removal
-- Never delete the main repository (check if path matches main worktree)
-- Always run `git worktree prune` after removal
-- Display clear confirmation messages
-- Provide guidance on branch deletion (but never auto-delete branches)
-- Handle both absolute and relative paths
-- Resolve relative paths to absolute before validation
+- /list:working-tree - See all worktrees before deciding what to remove
+- /status:working-tree - Check current worktree before removing
+- /create:working-tree - Create new worktree after removal
 
-## Related
+## DELEGATION
 
-- `/wtm-list` - See all worktrees before deciding what to remove
-- `/wtm-status` - Check current worktree before removing
-- `/wtm-new` - Create new worktree after removal
-- For guidance on when to remove worktrees, invoke the `working-tree-consultant` agent
+For guidance on when to remove worktrees:
+```
+Task(
+  subagent_type='working-tree-consultant',
+  description='Worktree removal strategy',
+  prompt='[question about when/how to safely remove worktrees]'
+)
+```
