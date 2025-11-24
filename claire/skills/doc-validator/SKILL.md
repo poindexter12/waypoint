@@ -1,21 +1,9 @@
 ---
 name: doc-validator
-description: Validate documentation files for completeness, accuracy, and consistency. Use when checking README files, API docs, or documentation quality.
-allowed-tools: Read, Grep, Glob
+description: Validate documentation files for completeness, accuracy, and consistency with the codebase. Use when user mentions "check documentation", "validate docs", "is the README up to date?", requests documentation review, says "docs are wrong" or "fix the docs", or is working on documentation improvements. Covers README files, API docs, CHANGELOG, and any markdown documentation.
 ---
 
-# Documentation Validator Skill
-
-Validates documentation files to ensure they are complete, accurate, and consistent with the codebase.
-
-## When to Use
-
-Activate this skill when:
-- User mentions "check documentation" or "validate docs"
-- User asks "is the README up to date?"
-- User requests documentation review
-- User mentions "docs are wrong" or "fix the docs"
-- Working on documentation improvements
+# Documentation Validator
 
 ## Validation Checks
 
@@ -79,5 +67,3 @@ Activate this skill when:
 ## Supporting Files
 
 For detailed validation rules, see [REFERENCE.md](REFERENCE.md).
-
-For common issues and fixes, see the `/templates` directory.

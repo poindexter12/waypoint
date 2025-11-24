@@ -44,17 +44,17 @@ make help
 
 Git worktree management with AI context tracking. Creates isolated development environments with structured metadata that helps Claude understand your workflow.
 
-**Commands**: `/wtm-new`, `/wtm-status`, `/wtm-list`, `/wtm-destroy`, `/wtm-adopt`
+**Commands**: `/working-tree:new`, `/working-tree:status`, `/working-tree:list`, `/working-tree:destroy`, `/working-tree:adopt`
 **Agents**: `@working-tree:manager`
 
 See [working-tree/README.md](./working-tree/README.md) for detailed documentation.
 
 ### [claire](./claire/README.md)
 
-Meta-agent system for creating and optimizing Claude Code components (agents, commands, and skills). Includes a coordinator to help decide what to build and three specialized author agents for creating each component type. Automatically fetches latest official documentation to ensure best practices.
+Meta-agent system for creating and optimizing Claude Code components (agents and commands). Includes a coordinator to help decide what to build and two specialized author agents. For skills, the coordinator delegates to the `skill-creator` skill from the anthropic-agent-skills plugin.
 
-**Commands**: `/claire-fetch-docs`
-**Agents**: `@claire:coordinator`, `@claire:agent-author`, `@claire:command-author`, `@claire:skill-author`
+**Commands**: `/claire:fetch-docs`
+**Agents**: `@claire:coordinator`, `@claire:author-agent`, `@claire:author-command`
 **Skills**: `doc-validator`
 
 See [claire/README.md](./claire/README.md) for detailed documentation.
@@ -109,9 +109,8 @@ After installation, your Claude directory will look like:
 │   │   └── manager.md
 │   └── claire/
 │       ├── coordinator.md
-│       ├── agent-author.md
-│       ├── command-author.md
-│       └── skill-author.md
+│       ├── author-agent.md
+│       └── author-command.md
 ├── commands/
 │   ├── working-tree/
 │   │   ├── new.md

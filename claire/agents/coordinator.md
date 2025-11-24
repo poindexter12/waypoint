@@ -104,7 +104,7 @@ Action: ASK_CLARIFICATION
 ```
 User: "create an agent for database migrations"
 Match: PHASE 1 explicit type ("create an agent")
-Action: DO_NOT_INVOKE → route to claire-agent-author
+Action: DO_NOT_INVOKE → route to claire-author-agent
 ```
 
 ```
@@ -248,7 +248,7 @@ DELEGATION PROTOCOL:
 #### IF recommendation is "agent":
 ```
 Task(
-  subagent_type='claire-agent-author',
+  subagent_type='claire-author-agent',
   description='Create {agent-name} agent',
   prompt='''
 Create an agent with the following requirements:
@@ -270,7 +270,7 @@ Please create the agent specification following best practices from the document
 #### IF recommendation is "command":
 ```
 Task(
-  subagent_type='claire-command-author',
+  subagent_type='claire-author-command',
   description='Create {command-name} command',
   prompt='''
 Create a slash command with the following requirements:
@@ -289,26 +289,19 @@ Please create the command specification following best practices from the docume
 ```
 
 #### IF recommendation is "skill":
+
+Invoke the `skill-creator` skill (from anthropic-agent-skills plugin):
 ```
-Task(
-  subagent_type='claire-skill-author',
-  description='Create {skill-name} skill',
-  prompt='''
-Create a skill with the following requirements:
-
-Purpose: {PURPOSE from STEP 1}
-Trigger keywords: {KEYWORDS from STEP 1}
-Capabilities: {CAPABILITIES from STEP 1}
-Supporting files needed: {FILES from STEP 1}
-Progressive disclosure: {DISCLOSURE PATTERN from STEP 1}
-
-Additional context:
-{ALL GATHERED REQUIREMENTS from conversation}
-
-Please create the skill specification following best practices from the documentation.
-'''
-)
+Skill(skill="example-skills:skill-creator")
 ```
+
+Then guide the user through the skill-creator workflow with these requirements:
+- Purpose: {PURPOSE from STEP 1}
+- Trigger keywords: {KEYWORDS from STEP 1}
+- Capabilities: {CAPABILITIES from STEP 1}
+- Supporting files needed: {FILES from STEP 1}
+
+**Waypoint-specific note:** After skill creation, place the skill in `<module>/skills/<skill-name>/` and update the module's Makefile if needed.
 
 HANDOFF MESSAGE:
 "I'll now delegate this to the {specialist} to create it..."
@@ -419,9 +412,9 @@ CONTROL FLOW:
 | Read | claire/commands/*.md | ALLOW | file_exists | valid_markdown | N/A |
 | Read | claire/skills/* | ALLOW | file_exists | N/A | N/A |
 | Read | **/.env* | DENY | N/A | N/A | ABORT "Secrets file" |
-| Task | claire-agent-author | ALLOW | requirements_gathered | N/A | N/A |
-| Task | claire-command-author | ALLOW | requirements_gathered | N/A | N/A |
-| Task | claire-skill-author | ALLOW | requirements_gathered | N/A | N/A |
+| Task | claire-author-agent | ALLOW | requirements_gathered | N/A | N/A |
+| Task | claire-author-command | ALLOW | requirements_gathered | N/A | N/A |
+| Skill | example-skills:skill-creator | ALLOW | requirements_gathered | N/A | N/A |
 | Task | * | DENY | N/A | N/A | ABORT "Unknown specialist" |
 | Write | ** | DENY | N/A | N/A | ABORT "Coordinator delegates, doesn't create" |
 | Edit | ** | DENY | N/A | N/A | ABORT "Coordinator delegates, doesn't create" |
@@ -490,7 +483,7 @@ EXPECTED FLOW:
 4. STEP 2 → Read docs-cache (if available)
 5. STEP 3 → DECISION RULE 1 scores: user-initiated(+3) + simple actions(+3) + minimal context(+2) + no ongoing(+2) + no files(+1) = 11 → Command
 6. STEP 4 → Recommend Command with reasoning
-7. STEP 5 → Delegate to claire-command-author
+7. STEP 5 → Delegate to claire-author-command
 
 EXPECTED OUTPUT:
 ```
@@ -513,7 +506,7 @@ User: "Create an agent for managing API documentation"
 
 EXPECTED FLOW:
 1. INVOCATION DECISION TREE → PHASE 1 matches "create an agent" → DO_NOT_INVOKE
-2. System routes directly to claire-agent-author (coordinator not involved)
+2. System routes directly to claire-author-agent (coordinator not involved)
 
 EXPECTED: Coordinator never invoked
 
@@ -531,7 +524,7 @@ EXPECTED FLOW:
 4. STEP 1 → Gather requirements
 5. STEP 3 → DECISION RULE 3 scores: multi-step(+4) + domain-expertise(+3) + stateful(+3) + deep-context(+3) + ongoing(+2) = 15 → Agent
 6. STEP 4 → Recommend Agent
-7. STEP 5 → Delegate to claire-agent-author
+7. STEP 5 → Delegate to claire-author-agent
 
 ### TS004: Multiple valid options
 
@@ -566,7 +559,7 @@ Which approach do you prefer?
 
 ## VERSION
 
-- Version: 2.0.0
+- Version: 2.1.0
 - Created: 2025-11-23
-- Updated: 2025-11-23 (optimized for AI consumption)
+- Updated: 2025-11-24 (skill creation now delegates to skill-creator skill)
 - Purpose: Triage and route component creation requests with deterministic decision logic

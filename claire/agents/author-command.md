@@ -74,7 +74,7 @@ ASK CLARIFYING QUESTIONS:
 ```
 Required information:
 1. Command purpose (what action does it perform?)
-2. Command name (verb:namespace format, e.g., /create:worktree)
+2. Command name (namespace:verb format, e.g., /working-tree:new)
 3. Arguments (required vs optional, types, validation)
 4. Tools needed (Bash, Read, Write, etc.)
 5. Execution model (simple script or complex workflow?)
@@ -83,7 +83,7 @@ Required information:
 
 DO NOT PROCEED without:
 - REQUIRED: Command purpose
-- REQUIRED: Command name (in verb:namespace format)
+- REQUIRED: Command name (in namespace:verb format)
 - REQUIRED: Argument specification
 - OPTIONAL: Tool requirements
 
@@ -97,7 +97,7 @@ Grep(pattern="<namespace>", path="**/commands/", output_mode="files_with_matches
 ```
 
 READ similar commands (2-3 maximum):
-- Note naming conventions (verb:namespace)
+- Note naming conventions (namespace:verb)
 - Review frontmatter patterns
 - Check argument-hint formats
 - Identify tool usage patterns
@@ -137,10 +137,10 @@ disable-model-invocation: bool # OPTIONAL: prevent automatic invocation
 ```
 
 COMMAND NAME RULES:
-- Format: /verb:namespace
-- Verb: action word (create, list, destroy, fetch, etc.)
+- Format: /namespace:verb
 - Namespace: topic/domain (working-tree, claire, git, etc.)
-- Examples: /create:worktree, /list:working-tree, /fetch:docs-claire
+- Verb: action word (new, list, destroy, status, adopt, etc.)
+- Examples: /working-tree:new, /working-tree:list, /claire:fetch-docs
 
 ARGUMENT PATTERNS:
 ```
@@ -350,7 +350,7 @@ NEXT:
 ### PATTERN: invalid-command-name
 
 DETECTION:
-- TRIGGER: Command name doesn't match /verb:namespace pattern
+- TRIGGER: Command name doesn't match /namespace:verb pattern
 - CHECK: `[[ "$COMMAND_NAME" =~ ^/[a-z-]+:[a-z-]+$ ]]`
 
 RESPONSE:
@@ -358,17 +358,17 @@ RESPONSE:
 Error: Invalid command name format
 
 Provided: {COMMAND_NAME}
-Expected: /verb:namespace
+Expected: /namespace:verb
 
 Examples:
-  /create:worktree
-  /list:working-tree
-  /fetch:docs-claire
+  /working-tree:new
+  /working-tree:list
+  /claire:fetch-docs
 
 Rules:
 - Start with /
 - Lowercase letters and hyphens only
-- Colon separates verb and namespace
+- Colon separates namespace and verb
 - No underscores, no numbers
 ```
 
@@ -490,20 +490,20 @@ EXPECTED FLOW:
 1. INVOCATION DECISION TREE → "create.*command" → INVOKE
 2. STEP 1 → Check cache (assume valid)
 3. STEP 2 → Ask clarifying questions
-4. User: "Command name /list:tags, no arguments, use git tag"
+4. User: "Command name /git:list-tags, no arguments, use git tag"
 5. STEP 3 → Search similar commands (list:*)
 6. STEP 4 → Read slash-commands.md
 7. STEP 5 → Design frontmatter (description, tools: Bash)
 8. STEP 6-8 → Write specification with execution protocol
-9. STEP 9 → Write git/commands/list.md (namespace: tags)
+9. STEP 9 → Write git/commands/list-tags.md
 10. STEP 10 → Output summary
 
 EXPECTED OUTPUT:
 ```
 ✓ Command created successfully
 
-  Name: /list:tags
-  File: git/commands/list.md
+  Name: /git:list-tags
+  File: git/commands/list-tags.md
   Arguments: (none)
   Tools: Bash
 
@@ -562,15 +562,15 @@ Expected: /verb:namespace
 
 ## COMMAND DESIGN PRINCIPLES
 
-### Verb:Namespace Pattern
+### Namespace:Verb Pattern
 ```
-/verb:namespace
+/namespace:verb
 
 Examples:
-✓ /create:worktree
-✓ /list:working-tree
-✓ /fetch:docs-claire
-✓ /destroy:worktree
+✓ /working-tree:new
+✓ /working-tree:list
+✓ /claire:fetch-docs
+✓ /working-tree:destroy
 
 ✗ /wtm-new (old pattern)
 ✗ /createWorktree (camelCase)
@@ -589,7 +589,7 @@ Grant ONLY tools command actually uses:
 ```markdown
 ## ARGUMENT SPECIFICATION
 
-SYNTAX: /command:name <required> [optional] [--flag <value>]
+SYNTAX: /namespace:verb <required> [optional] [--flag <value>]
 
 REQUIRED:
   <arg-name>
@@ -626,10 +626,11 @@ CONTROL FLOW: ABORT/RETRY/FALLBACK
 
 ## VERSION
 
-- Version: 2.0.0
+- Version: 2.1.0
 - Created: 2025-11-23
-- Updated: 2025-11-24 (AI optimization)
+- Updated: 2025-11-24 (fixed namespace:verb pattern)
 - Purpose: Create and optimize Claude Code slash commands
 - Changelog:
-  - 2.0.0 (2025-11-24): AI-optimized with decision trees, execution protocols, verb:namespace pattern
+  - 2.1.0 (2025-11-24): Fixed command naming to namespace:verb pattern (was incorrectly verb:namespace)
+  - 2.0.0 (2025-11-24): AI-optimized with decision trees, execution protocols
   - 1.0.0 (2025-11-23): Initial creation (split from optimizer)

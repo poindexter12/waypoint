@@ -65,13 +65,13 @@ make check working-tree
 
 All commands operate independently without requiring agent invocation. Use these for day-to-day worktree operations.
 
-#### `/wtm-new` - Create New Worktree
+#### `/working-tree:new` - Create New Worktree
 
 Creates a new worktree with branch, metadata, and documentation.
 
 **Usage**:
 ```bash
-/wtm-new <branch> [--mode <mode>] [--description "<text>"]
+/working-tree:new <branch> [--mode <mode>] [--description "<text>"]
 ```
 
 **Modes**:
@@ -83,9 +83,9 @@ Creates a new worktree with branch, metadata, and documentation.
 
 **Examples**:
 ```bash
-/wtm-new feature/user-auth
-/wtm-new bugfix/session-timeout --mode bugfix --description "Fix session expiry bug"
-/wtm-new exp/ai-integration --mode experiment --description "Spike on AI features"
+/working-tree:new feature/user-auth
+/working-tree:new bugfix/session-timeout --mode bugfix --description "Fix session expiry bug"
+/working-tree:new exp/ai-integration --mode experiment --description "Spike on AI features"
 ```
 
 **What It Does**:
@@ -99,13 +99,13 @@ Creates a new worktree with branch, metadata, and documentation.
 
 ---
 
-#### `/wtm-status` - Show Current Worktree Info
+#### `/working-tree:status` - Show Current Worktree Info
 
 Displays metadata for the current worktree.
 
 **Usage**:
 ```bash
-/wtm-status
+/working-tree:status
 ```
 
 **Output Example**:
@@ -122,19 +122,19 @@ Purpose:
 Refactor authentication flow to support OAuth2
 ```
 
-If no metadata exists, suggests using `/wtm-adopt` to add it.
+If no metadata exists, suggests using `/working-tree:adopt` to add it.
 
 **Location**: `~/.claude/commands/working-tree/status.md`
 
 ---
 
-#### `/wtm-list` - List All Worktrees
+#### `/working-tree:list` - List All Worktrees
 
 Shows all registered worktrees with their metadata in a table format.
 
 **Usage**:
 ```bash
-/wtm-list
+/working-tree:list
 ```
 
 **Output Example**:
@@ -155,13 +155,13 @@ The current worktree is marked with `→`.
 
 ---
 
-#### `/wtm-destroy` - Remove Worktree
+#### `/working-tree:destroy` - Remove Worktree
 
 Safely removes a worktree and its metadata.
 
 **Usage**:
 ```bash
-/wtm-destroy <worktree-path>
+/working-tree:destroy <worktree-path>
 ```
 
 **Important**: This command:
@@ -173,26 +173,26 @@ Safely removes a worktree and its metadata.
 
 **Example**:
 ```bash
-/wtm-destroy ../myapp-feature-login
+/working-tree:destroy ../myapp-feature-login
 ```
 
 **Location**: `~/.claude/commands/working-tree/destroy.md`
 
 ---
 
-#### `/wtm-adopt` - Add Metadata to Existing Worktree
+#### `/working-tree:adopt` - Add Metadata to Existing Worktree
 
 Retroactively adds metadata to a worktree that was created manually or lacks metadata.
 
 **Usage**:
 ```bash
-/wtm-adopt [--mode <mode>] [--description "<text>"]
+/working-tree:adopt [--mode <mode>] [--description "<text>"]
 ```
 
 **Example**:
 ```bash
 # From within an existing worktree
-/wtm-adopt --mode feature --description "User authentication system"
+/working-tree:adopt --mode feature --description "User authentication system"
 ```
 
 **Location**: `~/.claude/commands/working-tree/adopt.md`
@@ -219,9 +219,9 @@ The `working-tree-consultant` agent provides expert guidance for complex worktre
 - "Set up worktrees for dev, staging, and production deployments"
 
 **Do NOT use the agent for:**
-- Creating a single worktree → Use `/wtm-new`
-- Listing worktrees → Use `/wtm-list`
-- Checking status → Use `/wtm-status`
+- Creating a single worktree → Use `/working-tree:new`
+- Listing worktrees → Use `/working-tree:list`
+- Checking status → Use `/working-tree:status`
 - Simple operations → Use commands
 
 **Location**: `~/.claude/agents/working-tree/consultant.md`
@@ -274,7 +274,7 @@ Experiment mode allows:
 - AI will be aggressive with suggestions
 - Expect to discard if prototype fails
 
-Command: /wtm-new exp/prototype-name --mode experiment
+Command: /working-tree:new exp/prototype-name --mode experiment
 ```
 
 ---
@@ -285,11 +285,11 @@ Command: /wtm-new exp/prototype-name --mode experiment
 
 | Your Need | Use This |
 |-----------|----------|
-| Create a worktree | `/wtm-new <branch>` command |
-| See all worktrees | `/wtm-list` command |
-| Check current worktree | `/wtm-status` command |
-| Remove a worktree | `/wtm-destroy <path>` command |
-| Add metadata | `/wtm-adopt` command |
+| Create a worktree | `/working-tree:new <branch>` command |
+| See all worktrees | `/working-tree:list` command |
+| Check current worktree | `/working-tree:status` command |
+| Remove a worktree | `/working-tree:destroy <path>` command |
+| Add metadata | `/working-tree:adopt` command |
 | Understand mode semantics | Mention "worktree mode semantics" (triggers skill) |
 | Get best practices | Mention "worktree best practices" (triggers skill) |
 | Strategic guidance | Invoke `working-tree-consultant` agent |
@@ -301,7 +301,7 @@ Command: /wtm-new exp/prototype-name --mode experiment
 ```
 Do you need to DO something?
   ├─ Yes: Simple operation (create, list, status, destroy, adopt)
-  │   └─ Use COMMAND (/wtm-*)
+  │   └─ Use COMMAND (/working-tree:*)
   │
   ├─ No: Want to LEARN something?
   │   ├─ Quick reference/templates
@@ -422,7 +422,7 @@ This makes worktrees:
 
 ```bash
 # Create new feature worktree
-/wtm-new feature/payment-processing --description "Add Stripe integration"
+/working-tree:new feature/payment-processing --description "Add Stripe integration"
 
 # Output:
 # Created worktree successfully!
@@ -439,7 +439,7 @@ cd ../myapp-feature-payment-processing
 
 ```bash
 # Create bugfix worktree
-/wtm-new bugfix/null-check --mode bugfix --description "Fix null pointer in auth"
+/working-tree:new bugfix/null-check --mode bugfix --description "Fix null pointer in auth"
 
 # AI knows to keep changes minimal and focused
 cd ../myapp-bugfix-null-check
@@ -447,14 +447,14 @@ cd ../myapp-bugfix-null-check
 
 # Clean up when done
 cd ../myapp
-/wtm-destroy ../myapp-bugfix-null-check
+/working-tree:destroy ../myapp-bugfix-null-check
 ```
 
 ### Experimental Work
 
 ```bash
 # Create experiment worktree
-/wtm-new exp/graphql-migration --mode experiment --description "Test GraphQL migration"
+/working-tree:new exp/graphql-migration --mode experiment --description "Test GraphQL migration"
 
 # AI knows larger, riskier changes are acceptable
 cd ../myapp-exp-graphql-migration
@@ -469,19 +469,19 @@ cd ../myapp-exp-graphql-migration
 
 ```bash
 # Morning: Create API worktree
-/wtm-new feature/api-v2 --description "New REST API endpoints"
+/working-tree:new feature/api-v2 --description "New REST API endpoints"
 cd ../myapp-feature-api-v2
 # Work on API...
 
 # Afternoon: Create UI worktree
-/wtm-new feature/ui-redesign --description "Frontend redesign"
+/working-tree:new feature/ui-redesign --description "Frontend redesign"
 cd ../myapp-feature-ui-redesign
 # Work on UI...
 
 # No git stash needed! Context switching is instant: just `cd`
 
 # Check all active work
-/wtm-list
+/working-tree:list
 ```
 
 ### Migration to Worktrees
@@ -508,7 +508,7 @@ The working-tree module enforces these rules:
 - ✓ **Isolation**: Each worktree is treated as independent
 - ✓ **Validation**: Commands check if branch is already checked out
 - ✓ **No auto-delete**: Never removes worktrees without explicit command
-- ✓ **Branch preservation**: `/wtm-destroy` never deletes branches
+- ✓ **Branch preservation**: `/working-tree:destroy` never deletes branches
 - ✓ **Uncommitted change warnings**: Warns before destroying worktrees with uncommitted work
 - ✓ **Mode validation**: Ensures mode is one of the five valid values
 - ✓ **Metadata integrity**: Validates JSON structure before writing
@@ -524,24 +524,24 @@ The working-tree module enforces these rules:
 **Solution**:
 ```bash
 # See what's checked out where
-/wtm-list
+/working-tree:list
 
 # Option 1: Use existing worktree
 cd ../existing-worktree
 
 # Option 2: Destroy old worktree first
-/wtm-destroy ../old-worktree
-/wtm-new feature/branch-name
+/working-tree:destroy ../old-worktree
+/working-tree:new feature/branch-name
 ```
 
 ### Missing Metadata
 
-**Cause**: Worktree was created manually without `/wtm-new`.
+**Cause**: Worktree was created manually without `/working-tree:new`.
 
 **Solution**:
 ```bash
 cd /path/to/worktree
-/wtm-adopt --mode feature --description "Purpose of this worktree"
+/working-tree:adopt --mode feature --description "Purpose of this worktree"
 ```
 
 ### Stale Worktrees
@@ -551,7 +551,7 @@ cd /path/to/worktree
 **Solution**:
 ```bash
 git worktree prune
-/wtm-list  # Verify cleanup
+/working-tree:list  # Verify cleanup
 ```
 
 ### Too Many Worktrees
@@ -561,10 +561,10 @@ git worktree prune
 **Solution**:
 ```bash
 # Audit all worktrees
-/wtm-list
+/working-tree:list
 
 # Destroy completed work
-/wtm-destroy ../myapp-feature-completed
+/working-tree:destroy ../myapp-feature-completed
 
 # For strategic cleanup guidance, invoke consultant:
 # "Help me organize my worktrees, I have too many"
@@ -614,11 +614,11 @@ After installation, these files are in `~/.claude/` (or your specified directory
 ```
 ~/.claude/
 ├── commands/working-tree/
-│   ├── new.md           # /wtm-new command
-│   ├── status.md        # /wtm-status command
-│   ├── list.md          # /wtm-list command
-│   ├── destroy.md       # /wtm-destroy command
-│   └── adopt.md         # /wtm-adopt command
+│   ├── new.md           # /working-tree:new command
+│   ├── status.md        # /working-tree:status command
+│   ├── list.md          # /working-tree:list command
+│   ├── destroy.md       # /working-tree:destroy command
+│   └── adopt.md         # /working-tree:adopt command
 │
 ├── agents/working-tree/
 │   └── consultant.md    # working-tree-consultant agent

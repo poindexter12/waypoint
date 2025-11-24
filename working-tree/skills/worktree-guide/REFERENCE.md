@@ -42,8 +42,8 @@ git stash pop
 **Worktree Workflow:**
 ```bash
 # Create worktrees once
-/wtm-new feature/user-auth
-/wtm-new main --mode main
+/working-tree:new feature/user-auth
+/working-tree:new main --mode main
 
 # Switch by changing directories
 cd ../myapp-feature-user-auth  # Feature work
@@ -131,7 +131,7 @@ Parent directory/
 
 **Example:**
 ```bash
-/wtm-new main --mode main --description "Production baseline for hotfixes"
+/working-tree:new main --mode main --description "Production baseline for hotfixes"
 ```
 
 **Workflow:**
@@ -171,7 +171,7 @@ git push origin main
 
 **Example:**
 ```bash
-/wtm-new feature/user-dashboard --mode feature --description "New user settings dashboard with profile management"
+/working-tree:new feature/user-dashboard --mode feature --description "New user settings dashboard with profile management"
 ```
 
 **Workflow:**
@@ -211,7 +211,7 @@ git push origin feature/user-dashboard
 
 **Example:**
 ```bash
-/wtm-new bugfix/session-timeout --mode bugfix --description "Fix session timeout not respecting user settings (issue #427)"
+/working-tree:new bugfix/session-timeout --mode bugfix --description "Fix session timeout not respecting user settings (issue #427)"
 ```
 
 **Workflow:**
@@ -251,7 +251,7 @@ git push origin bugfix/session-timeout
 
 **Example:**
 ```bash
-/wtm-new exp/graphql-migration --mode experiment --description "Spike: evaluate GraphQL migration feasibility"
+/working-tree:new exp/graphql-migration --mode experiment --description "Spike: evaluate GraphQL migration feasibility"
 ```
 
 **Workflow:**
@@ -261,7 +261,7 @@ cd ../myapp-exp-graphql-migration
 # Don't worry about polish
 # Document learnings
 # If successful → create feature worktree for proper implementation
-# If failed → /wtm-destroy and document why
+# If failed → /working-tree:destroy and document why
 ```
 
 ### review - Analytical Mindset
@@ -289,7 +289,7 @@ cd ../myapp-exp-graphql-migration
 
 **Example:**
 ```bash
-/wtm-new review/pr-543 --mode review --description "Review authentication refactor PR #543"
+/working-tree:new review/pr-543 --mode review --description "Review authentication refactor PR #543"
 ```
 
 **Workflow:**
@@ -301,7 +301,7 @@ git checkout review/pr-543
 # Add review comments
 # Test changes
 # Approve or request changes in PR
-# When done → /wtm-destroy
+# When done → /working-tree:destroy
 ```
 
 ---
@@ -351,7 +351,7 @@ Use branch prefixes to auto-infer modes:
 
 **Setup:**
 ```bash
-/wtm-new feature/user-dashboard --mode feature --description "User settings dashboard with profile editing"
+/working-tree:new feature/user-dashboard --mode feature --description "User settings dashboard with profile editing"
 ```
 
 **Workflow:**
@@ -372,7 +372,7 @@ git push origin feature/user-dashboard
 
 # After merge
 cd ../myapp
-/wtm-destroy ../myapp-feature-user-dashboard
+/working-tree:destroy ../myapp-feature-user-dashboard
 ```
 
 ### Pattern 2: Parallel Feature Work
@@ -381,9 +381,9 @@ cd ../myapp
 
 **Setup:**
 ```bash
-/wtm-new feature/api-v2 --description "New API endpoints"
-/wtm-new feature/ui-redesign --description "Frontend redesign"
-/wtm-new feature/user-auth --description "OAuth2 authentication"
+/working-tree:new feature/api-v2 --description "New API endpoints"
+/working-tree:new feature/ui-redesign --description "Frontend redesign"
+/working-tree:new feature/user-auth --description "OAuth2 authentication"
 ```
 
 **Workflow:**
@@ -402,10 +402,10 @@ cd ../myapp-feature-ui-redesign
 **Management:**
 ```bash
 # Check status of all work
-/wtm-list
+/working-tree:list
 
 # See current worktree
-/wtm-status
+/working-tree:status
 ```
 
 ### Pattern 3: Urgent Hotfix During Feature Work
@@ -420,7 +420,7 @@ cd ../myapp-feature-user-dashboard
 # Urgent bug reported!
 # Don't stash - just create bugfix worktree
 cd ../myapp
-/wtm-new bugfix/critical-auth-flaw --mode bugfix
+/working-tree:new bugfix/critical-auth-flaw --mode bugfix
 
 # Fix the bug
 cd ../myapp-bugfix-critical-auth-flaw
@@ -438,9 +438,9 @@ cd ../myapp-feature-user-dashboard
 
 **Setup:**
 ```bash
-/wtm-new develop --mode feature --description "Development environment"
-/wtm-new staging --mode review --description "Staging for QA testing"
-/wtm-new production --mode main --description "Production deployment code"
+/working-tree:new develop --mode feature --description "Development environment"
+/working-tree:new staging --mode review --description "Staging for QA testing"
+/working-tree:new production --mode main --description "Production deployment code"
 ```
 
 **Workflow:**
@@ -479,14 +479,14 @@ Each environment has its own:
 **Setup:**
 ```bash
 # For each PR to review
-/wtm-new review/pr-<number> --mode review --description "Review PR #<number>: <title>"
+/working-tree:new review/pr-<number> --mode review --description "Review PR #<number>: <title>"
 ```
 
 **Workflow:**
 ```bash
 # Create review worktree
 cd ../myapp
-/wtm-new review/pr-543 --mode review
+/working-tree:new review/pr-543 --mode review
 
 cd ../myapp-review-pr-543
 # Fetch the PR branch
@@ -503,7 +503,7 @@ git diff main...review/pr-543
 # Add review comments in GitHub
 # When done
 cd ../myapp
-/wtm-destroy ../myapp-review-pr-543
+/working-tree:destroy ../myapp-review-pr-543
 ```
 
 ---
@@ -625,10 +625,10 @@ myapp-bugfix-auth-leak/   # mode: bugfix
 
 **Commands:**
 ```bash
-/wtm-adopt --mode main --description "Main repository"
-/wtm-new feature/api-v2
-/wtm-new feature/ui-refresh
-/wtm-new bugfix/auth-leak --mode bugfix
+/working-tree:adopt --mode main --description "Main repository"
+/working-tree:new feature/api-v2
+/working-tree:new feature/ui-refresh
+/working-tree:new bugfix/auth-leak --mode bugfix
 ```
 
 ### Strategy 2: Environment-Based
@@ -651,9 +651,9 @@ myapp-feature-X/     # mode: feature (temporary feature work)
 
 **Commands:**
 ```bash
-/wtm-new develop --mode feature --description "Development environment"
-/wtm-new staging --mode review --description "Staging for QA"
-/wtm-new main --mode main --description "Production code"
+/working-tree:new develop --mode feature --description "Development environment"
+/working-tree:new staging --mode review --description "Staging for QA"
+/working-tree:new main --mode main --description "Production code"
 ```
 
 ### Strategy 3: Experimentation-Heavy
@@ -676,9 +676,9 @@ myapp-exp-new-framework/ # mode: experiment
 
 **Commands:**
 ```bash
-/wtm-adopt --mode main --description "Stable baseline for comparisons"
-/wtm-new exp/approach-a --mode experiment
-/wtm-new exp/approach-b --mode experiment
+/working-tree:adopt --mode main --description "Stable baseline for comparisons"
+/working-tree:new exp/approach-a --mode experiment
+/working-tree:new exp/approach-b --mode experiment
 ```
 
 ### Strategy 4: Review-Focused
@@ -701,8 +701,8 @@ myapp-review-security/ # mode: review (audit)
 
 **Commands:**
 ```bash
-/wtm-new review/pr-123 --mode review --description "Review user auth PR"
-/wtm-new review/security-audit --mode review
+/working-tree:new review/pr-123 --mode review --description "Review user auth PR"
+/working-tree:new review/security-audit --mode review
 ```
 
 ---
@@ -727,10 +727,10 @@ Create `WORKTREE-GUIDE.md` in your repository:
 - `bugfix`: Bug fixes only
 
 ## Workflow
-1. Create feature worktree: `/wtm-new feature/name`
+1. Create feature worktree: `/working-tree:new feature/name`
 2. Develop and commit
 3. Push and create PR
-4. After merge: `/wtm-destroy ../path`
+4. After merge: `/working-tree:destroy ../path`
 ```
 
 ### Team Conventions
@@ -756,7 +756,7 @@ Create `WORKTREE-GUIDE.md` in your repository:
 
 ### Cleanup
 - Destroy worktree immediately after PR merge
-- Run `/wtm-list` weekly to audit active worktrees
+- Run `/working-tree:list` weekly to audit active worktrees
 
 ### Descriptions
 - Always include issue number if applicable
@@ -816,8 +816,8 @@ Error: Branch 'feature/login' already has a worktree at /path/to/worktree
 cd /path/to/existing/worktree
 
 # Option 2: Destroy old worktree first
-/wtm-destroy /path/to/old/worktree
-/wtm-new feature/login
+/working-tree:destroy /path/to/old/worktree
+/working-tree:new feature/login
 
 # Option 3: Checkout different branch in main repo
 cd /path/to/main/repo
@@ -826,12 +826,12 @@ git checkout different-branch
 
 ### Issue: Metadata file is missing
 
-**Symptom:** `/wtm-status` shows "no metadata"
+**Symptom:** `/working-tree:status` shows "no metadata"
 
 **Solution:**
 ```bash
 # Add metadata to existing worktree
-/wtm-adopt --mode feature --description "Your description"
+/working-tree:adopt --mode feature --description "Your description"
 ```
 
 ### Issue: Uncommitted changes when destroying
@@ -844,16 +844,16 @@ git checkout different-branch
 cd /path/to/worktree
 git add .
 git commit -m "Save work in progress"
-/wtm-destroy /path/to/worktree
+/working-tree:destroy /path/to/worktree
 
 # Option 2: Stash changes
 cd /path/to/worktree
 git stash
-/wtm-destroy /path/to/worktree
+/working-tree:destroy /path/to/worktree
 # Later: git stash pop (in main repo or another worktree)
 
 # Option 3: Proceed anyway (DESTRUCTIVE)
-/wtm-destroy /path/to/worktree
+/working-tree:destroy /path/to/worktree
 # Will warn you, but can proceed
 ```
 
@@ -864,11 +864,11 @@ git stash
 **Solution:**
 ```bash
 # Audit all worktrees
-/wtm-list
+/working-tree:list
 
 # Identify completed work
 # For each completed worktree:
-/wtm-destroy ../myapp-feature-completed-thing
+/working-tree:destroy ../myapp-feature-completed-thing
 
 # Clean up stale references
 git worktree prune
@@ -881,16 +881,16 @@ git worktree prune
 **Solution:**
 ```bash
 # Check current worktree
-/wtm-status
+/working-tree:status
 
 # List all with descriptions
-/wtm-list
+/working-tree:list
 
 # Add better descriptions
-/wtm-adopt --description "Clear, specific purpose"
+/working-tree:adopt --description "Clear, specific purpose"
 
 # Clean up unclear worktrees
-/wtm-destroy ../myapp-temp  # Vague names
+/working-tree:destroy ../myapp-temp  # Vague names
 ```
 
 ### Issue: Metadata and branch don't match
@@ -902,7 +902,7 @@ git worktree prune
 **Solution:**
 ```bash
 # Re-adopt to update metadata
-/wtm-adopt --description "Updated description"
+/working-tree:adopt --description "Updated description"
 
 # This will regenerate metadata with correct branch
 ```
@@ -920,15 +920,15 @@ git worktree prune
 - ✅ Use branch prefixes for auto-mode
 
 **Usage:**
-- ✅ Run `/wtm-status` when starting work
-- ✅ Use `/wtm-list` to see all work
+- ✅ Run `/working-tree:status` when starting work
+- ✅ Use `/working-tree:list` to see all work
 - ✅ Keep modes consistent with work type
 - ✅ Update descriptions if purpose changes
 
 **Cleanup:**
 - ✅ Destroy after PR merge
 - ✅ Check for uncommitted changes first
-- ✅ Run weekly audit with `/wtm-list`
+- ✅ Run weekly audit with `/working-tree:list`
 - ✅ Clean up experiment worktrees promptly
 
 ### When NOT to Use Worktrees
@@ -997,19 +997,19 @@ git worktree prune
 
 ```bash
 # Create new worktree with metadata
-/wtm-new <branch-name> [--mode <mode>] [--description "<text>"]
+/working-tree:new <branch-name> [--mode <mode>] [--description "<text>"]
 
 # List all worktrees with metadata
-/wtm-list
+/working-tree:list
 
 # Show current worktree metadata
-/wtm-status
+/working-tree:status
 
 # Add metadata to existing worktree
-/wtm-adopt [--mode <mode>] [--description "<text>"]
+/working-tree:adopt [--mode <mode>] [--description "<text>"]
 
 # Remove worktree (preserves branch)
-/wtm-destroy <worktree-path>
+/working-tree:destroy <worktree-path>
 ```
 
 ### Mode Quick Reference

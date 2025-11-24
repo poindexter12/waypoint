@@ -95,8 +95,8 @@ description:
 AUTOMATED GENERATION:
 
 Instead of creating this file manually, use commands:
-  /wtm-new <branch-name> - Creates new worktree with metadata
-  /wtm-adopt - Adds metadata to existing worktree
+  /working-tree:new <branch-name> - Creates new worktree with metadata
+  /working-tree:adopt - Adds metadata to existing worktree
 
 These commands auto-generate this file with correct values.
 

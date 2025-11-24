@@ -346,36 +346,35 @@ PHASE 4: Decision with Confidence Threshold
 
 ## Naming Conventions
 
-### Commands: /verb:namespace
+### Commands: /namespace:verb
 
-Commands use the format `/verb:namespace` where:
-- **verb**: Action word (create, list, destroy, fetch, adopt, status)
+Commands use the format `/namespace:verb` where:
 - **namespace**: Topic/domain (working-tree, claire, git, etc.)
+- **verb**: Action word (new, list, destroy, fetch, adopt, status)
 
 **Examples**:
-- ✓ `/create:working-tree`
-- ✓ `/list:working-tree`
-- ✓ `/fetch:docs-claire`
-- ✓ `/status:working-tree`
+- ✓ `/working-tree:new`
+- ✓ `/working-tree:list`
+- ✓ `/working-tree:status`
+- ✓ `/claire:fetch-docs`
 - ✗ `/wtm-new` (old pattern)
 - ✗ `/createWorktree` (camelCase)
 - ✗ `/create_worktree` (underscores)
 
 **File naming**: `{namespace}/commands/{verb}.md`
-- `/create:working-tree` → `working-tree/commands/create.md`
-- `/list:working-tree` → `working-tree/commands/list.md`
-- `/fetch:docs-claire` → `claire/commands/fetch-docs.md`
+- `/working-tree:new` → `working-tree/commands/new.md`
+- `/working-tree:list` → `working-tree/commands/list.md`
+- `/claire:fetch-docs` → `claire/commands/fetch-docs.md`
 
 ### Agents: namespace-verb-noun
 
 Agents use the format `namespace-verb-noun` where:
 - **namespace**: Topic/domain (working-tree, claire)
-- **verb-noun**: Action-target pattern (author-agent, author-command, author-skill)
+- **verb-noun**: Action-target pattern (author-agent, author-command)
 
 **Examples**:
 - ✓ `claire-author-agent`
 - ✓ `claire-author-command`
-- ✓ `claire-author-skill`
 - ✓ `working-tree-consultant`
 - ✗ `claire-agent-author` (wrong order)
 - ✗ `agentAuthor` (camelCase)
@@ -612,7 +611,7 @@ def parse_worktree_list(porcelain_output: str) -> list[dict]:
 
 **BEFORE** (human-readable):
 ```markdown
-# /wtm-new
+# /working-tree:new
 
 Creates a new git worktree with a branch. You can optionally specify a mode like "feature" or "bugfix", and add a description.
 
@@ -620,7 +619,7 @@ Creates a new git worktree with a branch. You can optionally specify a mode like
 
 Just run the command with a branch name:
 ```
-/wtm-new my-feature-branch
+/working-tree:new my-feature-branch
 ```
 
 The command will create the worktree and set up metadata.
@@ -641,14 +640,14 @@ allowed-tools: Bash, Read, Write, Glob
 model: sonnet
 ---
 
-# /create:working-tree
+# /working-tree:new
 
 Create a new git worktree with associated branch and AI context metadata file.
 
 ## ARGUMENT SPECIFICATION
 
 ```
-SYNTAX: /create:working-tree <branch-name> [--mode <mode>] [--description "<text>"]
+SYNTAX: /working-tree:new <branch-name> [--mode <mode>] [--description "<text>"]
 
 REQUIRED:
   <branch-name>

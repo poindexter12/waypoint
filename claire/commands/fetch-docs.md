@@ -666,7 +666,7 @@ claire/
 
 ### With Claire Agents
 
-Claire agents (author-agent, author-command, author-skill) should:
+Claire agents (author-agent, author-command) should:
 1. Check if docs-cache exists and is fresh
 2. If missing or stale (> 24h), recommend running /fetch:docs-claire
 3. Read cached docs from claire/docs-cache/ for specifications

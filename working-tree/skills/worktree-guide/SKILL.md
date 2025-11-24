@@ -1,23 +1,11 @@
 ---
 name: worktree-guide
-description: Git worktree patterns, best practices, templates, and quick reference. Auto-invoked for "worktree best practices", "worktree patterns", "git worktree help", "worktree template", "worktree mode semantics".
-allowed-tools: Read
+description: Git worktree patterns, best practices, templates, and quick reference. Use when user asks about "worktree best practices", "worktree patterns", "git worktree help", "worktree template", "worktree mode semantics", "what are worktree modes", "explain worktree metadata", or needs guidance on worktree organization and workflows.
 ---
 
 # Git Worktree Guide
 
 Quick reference and templates for git worktree workflows with AI metadata integration.
-
-## When Invoked
-
-This skill activates when you mention:
-- "worktree best practices"
-- "worktree patterns"
-- "git worktree help"
-- "worktree template"
-- "worktree mode semantics"
-- "what are worktree modes"
-- "explain worktree metadata"
 
 ## Progressive Disclosure
 
@@ -28,11 +16,11 @@ This skill activates when you mention:
 Git worktrees let you checkout multiple branches simultaneously in separate directories. Each worktree has AI metadata (`.ai-context.json`) that helps tools understand context.
 
 **Quick Start:**
-- Create worktree: `/wtm-new <branch-name>`
-- List worktrees: `/wtm-list`
-- Check status: `/wtm-status`
-- Remove worktree: `/wtm-destroy <path>`
-- Add metadata: `/wtm-adopt`
+- Create worktree: `/working-tree:new <branch-name>`
+- List worktrees: `/working-tree:list`
+- Check status: `/working-tree:status`
+- Remove worktree: `/working-tree:destroy <path>`
+- Add metadata: `/working-tree:adopt`
 
 **What would you like to know more about?**
 1. Mode semantics (main, feature, bugfix, experiment, review)
@@ -122,25 +110,25 @@ To view templates:
 
 ### Pattern 1: Feature Development
 ```bash
-/wtm-new feature/user-auth --mode feature --description "Implement OAuth2"
+/working-tree:new feature/user-auth --mode feature --description "Implement OAuth2"
 ```
 Work in isolation, merge when ready.
 
 ### Pattern 2: Production Hotfix
 ```bash
-/wtm-new bugfix/critical-security-fix --mode bugfix
+/working-tree:new bugfix/critical-security-fix --mode bugfix
 ```
 Quick surgical fix, minimizes risk.
 
 ### Pattern 3: Experimentation
 ```bash
-/wtm-new exp/try-new-framework --mode experiment
+/working-tree:new exp/try-new-framework --mode experiment
 ```
 Prototype freely, discard if needed.
 
 ### Pattern 4: Code Review
 ```bash
-/wtm-new review/pr-123 --mode review --description "Review user auth PR"
+/working-tree:new review/pr-123 --mode review --description "Review user auth PR"
 ```
 Review without disrupting current work.
 
@@ -155,13 +143,13 @@ Review without disrupting current work.
 **DO:**
 - Use descriptive branch names: `feature/user-dashboard`
 - Add descriptions to worktrees: `--description "User settings page"`
-- Run `/wtm-list` regularly to see active work
+- Run `/working-tree:list` regularly to see active work
 - Choose appropriate mode for context
 
 **DON'T:**
 - Create worktree for same branch twice
 - Use generic names: `test`, `temp`, `new`
-- Forget to clean up: `/wtm-destroy` when done
+- Forget to clean up: `/working-tree:destroy` when done
 - Ignore uncommitted changes before destroying
 
 ## For More Detail
@@ -196,7 +184,7 @@ Experiment mode:
 - Good for POCs and spikes
 
 Command:
-/wtm-new exp/prototype-name --mode experiment --description "Testing new approach"
+/working-tree:new exp/prototype-name --mode experiment --description "Testing new approach"
 ```
 
 ### Example 2: Template Request
@@ -208,8 +196,8 @@ Skill: Here's the .ai-context.json template:
 [Shows content of templates/ai-context.json.template]
 
 You can create this manually or use:
-- /wtm-new to auto-generate when creating
-- /wtm-adopt to auto-generate for existing worktree
+- /working-tree:new to auto-generate when creating
+- /working-tree:adopt to auto-generate for existing worktree
 ```
 
 ### Example 3: Best Practices Request
@@ -220,7 +208,7 @@ Skill: **Quick Best Practices:**
 
 1. **Naming**: Use clear, structured names (myapp-feature-user-auth)
 2. **Modes**: Choose mode based on work type (see mode semantics above)
-3. **Cleanup**: Remove worktrees when done (/wtm-destroy)
+3. **Cleanup**: Remove worktrees when done (/working-tree:destroy)
 4. **Metadata**: Always add descriptions
 5. **Organization**: One feature = one worktree
 
@@ -231,6 +219,6 @@ Skill: **Quick Best Practices:**
 
 ## Related
 
-- Commands: `/wtm-new`, `/wtm-list`, `/wtm-status`, `/wtm-destroy`, `/wtm-adopt`
+- Commands: `/working-tree:new`, `/working-tree:list`, `/working-tree:status`, `/working-tree:destroy`, `/working-tree:adopt`
 - Agent: `working-tree-consultant` for strategic guidance
 - Documentation: See REFERENCE.md for comprehensive coverage

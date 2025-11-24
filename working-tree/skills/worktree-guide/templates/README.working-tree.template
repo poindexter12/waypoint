@@ -64,32 +64,32 @@ A git worktree allows you to check out multiple branches simultaneously in separ
 **`README.working-tree.md`** (This File)
 - Human-readable documentation
 - Explains mode semantics and worktree info
-- Generated automatically by `/wtm-new` or `/wtm-adopt`
+- Generated automatically by `/working-tree:new` or `/working-tree:adopt`
 
 ## Quick Commands
 
 ### View Status
 ```bash
-/wtm-status
+/working-tree:status
 ```
 Show metadata for current worktree.
 
 ### List All Worktrees
 ```bash
-/wtm-list
+/working-tree:list
 ```
 See all worktrees in this repository with their metadata.
 
 ### Remove This Worktree
 ```bash
 cd REPLACE_WITH_MAIN_REPO_PATH
-/wtm-destroy REPLACE_WITH_WORKTREE_PATH
+/working-tree:destroy REPLACE_WITH_WORKTREE_PATH
 ```
 Safely remove this worktree (preserves branch).
 
 ### Update Metadata
 ```bash
-/wtm-adopt --description "New description"
+/working-tree:adopt --description "New description"
 ```
 Update mode or description for this worktree.
 
@@ -131,7 +131,7 @@ git push origin REPLACE_WITH_BRANCH_NAME
 
 # 4. Remove worktree
 cd REPLACE_WITH_MAIN_REPO_PATH
-/wtm-destroy REPLACE_WITH_WORKTREE_PATH
+/working-tree:destroy REPLACE_WITH_WORKTREE_PATH
 
 # 5. Optionally delete branch after PR merge
 git branch -d REPLACE_WITH_BRANCH_NAME
@@ -139,7 +139,7 @@ git branch -d REPLACE_WITH_BRANCH_NAME
 
 ## Related Worktrees
 
-Use `/wtm-list` to see all active worktrees for this repository.
+Use `/working-tree:list` to see all active worktrees for this repository.
 
 ## Documentation
 
@@ -150,7 +150,7 @@ Use `/wtm-list` to see all active worktrees for this repository.
 ---
 
 **Auto-Generated:** This file was created automatically by the waypoint working-tree module.
-**Update:** Run `/wtm-adopt` to regenerate this file with updated information.
+**Update:** Run `/working-tree:adopt` to regenerate this file with updated information.
 
 
 EXAMPLE COMPLETE FILE (Feature Development):
@@ -221,32 +221,32 @@ A git worktree allows you to check out multiple branches simultaneously in separ
 **`README.working-tree.md`** (This File)
 - Human-readable documentation
 - Explains mode semantics and worktree info
-- Generated automatically by `/wtm-new` or `/wtm-adopt`
+- Generated automatically by `/working-tree:new` or `/working-tree:adopt`
 
 ## Quick Commands
 
 ### View Status
 ```bash
-/wtm-status
+/working-tree:status
 ```
 Show metadata for current worktree.
 
 ### List All Worktrees
 ```bash
-/wtm-list
+/working-tree:list
 ```
 See all worktrees in this repository with their metadata.
 
 ### Remove This Worktree
 ```bash
 cd /Users/joe/Code/myapp
-/wtm-destroy /Users/joe/Code/myapp-feature-user-auth
+/working-tree:destroy /Users/joe/Code/myapp-feature-user-auth
 ```
 Safely remove this worktree (preserves branch).
 
 ### Update Metadata
 ```bash
-/wtm-adopt --description "New description"
+/working-tree:adopt --description "New description"
 ```
 Update mode or description for this worktree.
 
@@ -288,7 +288,7 @@ git push origin feature/user-authentication
 
 # 4. Remove worktree
 cd /Users/joe/Code/myapp
-/wtm-destroy /Users/joe/Code/myapp-feature-user-auth
+/working-tree:destroy /Users/joe/Code/myapp-feature-user-auth
 
 # 5. Optionally delete branch after PR merge
 git branch -d feature/user-authentication
@@ -296,7 +296,7 @@ git branch -d feature/user-authentication
 
 ## Related Worktrees
 
-Use `/wtm-list` to see all active worktrees for this repository.
+Use `/working-tree:list` to see all active worktrees for this repository.
 
 ## Documentation
 
@@ -307,4 +307,4 @@ Use `/wtm-list` to see all active worktrees for this repository.
 ---
 
 **Auto-Generated:** This file was created automatically by the waypoint working-tree module.
-**Update:** Run `/wtm-adopt` to regenerate this file with updated information.
+**Update:** Run `/working-tree:adopt` to regenerate this file with updated information.
