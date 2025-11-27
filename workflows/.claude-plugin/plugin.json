@@ -1,0 +1,23 @@
+{
+  "name": "working-tree",
+  "description": "Git worktree management with AI context tracking - create, manage, and organize worktrees with metadata",
+  "version": "1.0.0",
+  "repository": "https://github.com/poindexter12/waypoint",
+  "license": "MIT",
+  "keywords": [
+    "git",
+    "worktree",
+    "workflow",
+    "branching"
+  ],
+  "agents": [
+    "./agents/consultant.md"
+  ],
+  "commands": [
+    "./commands/adopt.md",
+    "./commands/destroy.md",
+    "./commands/list.md",
+    "./commands/new.md",
+    "./commands/status.md"
+  ]
+}

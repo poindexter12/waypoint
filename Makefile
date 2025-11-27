@@ -4,7 +4,19 @@
 # Configuration
 CLAUDE_DIR ?= $(HOME)/.claude
 MODE ?= symlink
+
+# Module definitions: name -> source path
+# Workflows: operational tooling
+# Skills: domain knowledge
 MODULES := working-tree claire terraform
+
+# Module source paths (where they live in this repo)
+working-tree_PATH := workflows/working-tree
+claire_PATH := claire
+terraform_PATH := skills/terraform
+
+# Helper to get module path
+module_path = $($(1)_PATH)
 
 # Colors for output
 BLUE := \033[0;34m
@@ -64,13 +76,14 @@ SELECTED_MODULES := $(MODULES)
 endif
 
 # Helper function to install a module
+# $(1) = module name, $(2) = source path
 define install_module
-	@echo "$(BLUE)→ Installing module: $(1)$(NC)"
+	@echo "$(BLUE)→ Installing module: $(1) (from $(2))$(NC)"
 	@mkdir -p $(CLAUDE_DIR)/agents/$(1)
 	@mkdir -p $(CLAUDE_DIR)/commands/$(1)
 	@mkdir -p $(CLAUDE_DIR)/skills/$(1)
-	@if [ -d "$(1)/agents" ]; then \
-		for file in $(1)/agents/*.md; do \
+	@if [ -d "$(2)/agents" ]; then \
+		for file in $(2)/agents/*.md; do \
 			[ -f "$$file" ] || continue; \
 			dest=$(CLAUDE_DIR)/agents/$(1)/$$(basename $$file); \
 			if [ "$(MODE)" = "copy" ]; then \
@@ -82,8 +95,8 @@ define install_module
 			fi; \
 		done; \
 	fi
-	@if [ -d "$(1)/commands" ]; then \
-		for file in $(1)/commands/*.md; do \
+	@if [ -d "$(2)/commands" ]; then \
+		for file in $(2)/commands/*.md; do \
 			[ -f "$$file" ] || continue; \
 			dest=$(CLAUDE_DIR)/commands/$(1)/$$(basename $$file); \
 			if [ "$(MODE)" = "copy" ]; then \
@@ -95,8 +108,8 @@ define install_module
 			fi; \
 		done; \
 	fi
-	@if [ -d "$(1)/skills" ]; then \
-		for skilldir in $(1)/skills/*/; do \
+	@if [ -d "$(2)/skills" ]; then \
+		for skilldir in $(2)/skills/*/; do \
 			[ -d "$$skilldir" ] || continue; \
 			skillname=$$(basename $$skilldir); \
 			dest=$(CLAUDE_DIR)/skills/$(1)/$$skillname; \
@@ -136,8 +149,9 @@ define uninstall_module
 endef
 
 # Helper function to check a module
+# $(1) = module name, $(2) = source path
 define check_module
-	@echo "$(BLUE)→ Checking module: $(1)$(NC)"
+	@echo "$(BLUE)→ Checking module: $(1) (from $(2))$(NC)"
 	@if [ -d "$(CLAUDE_DIR)/agents/$(1)" ]; then \
 		echo "$(GREEN)    ✓ Directory exists: agents$(NC)"; \
 	else \
@@ -148,8 +162,8 @@ define check_module
 	else \
 		echo "$(RED)    ✗ Directory missing: commands$(NC)"; \
 	fi
-	@if [ -d "$(1)/agents" ]; then \
-		for file in $(1)/agents/*.md; do \
+	@if [ -d "$(2)/agents" ]; then \
+		for file in $(2)/agents/*.md; do \
 			[ -f "$$file" ] || continue; \
 			dest=$(CLAUDE_DIR)/agents/$(1)/$$(basename $$file); \
 			if [ ! -e "$$dest" ]; then \
@@ -168,8 +182,8 @@ define check_module
 			fi; \
 		done; \
 	fi
-	@if [ -d "$(1)/commands" ]; then \
-		for file in $(1)/commands/*.md; do \
+	@if [ -d "$(2)/commands" ]; then \
+		for file in $(2)/commands/*.md; do \
 			[ -f "$$file" ] || continue; \
 			dest=$(CLAUDE_DIR)/commands/$(1)/$$(basename $$file); \
 			if [ ! -e "$$dest" ]; then \
@@ -188,8 +202,8 @@ define check_module
 			fi; \
 		done; \
 	fi
-	@if [ -d "$(1)/skills" ]; then \
-		for skilldir in $(1)/skills/*/; do \
+	@if [ -d "$(2)/skills" ]; then \
+		for skilldir in $(2)/skills/*/; do \
 			[ -d "$$skilldir" ] || continue; \
 			skillname=$$(basename $$skilldir); \
 			dest=$(CLAUDE_DIR)/skills/$(1)/$$skillname; \
@@ -210,25 +224,26 @@ define check_module
 endef
 
 # Helper function to list module files
+# $(1) = module name, $(2) = source path
 define list_module
-	@echo "$(BLUE)→ Module: $(1)$(NC)"
+	@echo "$(BLUE)→ Module: $(1) (from $(2))$(NC)"
 	@echo "$(BLUE)  Agents → $(CLAUDE_DIR)/agents/$(1)/$(NC)"
-	@if [ -d "$(1)/agents" ]; then \
-		for file in $(1)/agents/*.md; do \
+	@if [ -d "$(2)/agents" ]; then \
+		for file in $(2)/agents/*.md; do \
 			[ -f "$$file" ] || continue; \
 			echo "    $(MODE): $$(basename $$file)"; \
 		done; \
 	fi
 	@echo "$(BLUE)  Commands → $(CLAUDE_DIR)/commands/$(1)/$(NC)"
-	@if [ -d "$(1)/commands" ]; then \
-		for file in $(1)/commands/*.md; do \
+	@if [ -d "$(2)/commands" ]; then \
+		for file in $(2)/commands/*.md; do \
 			[ -f "$$file" ] || continue; \
 			echo "    $(MODE): $$(basename $$file)"; \
 		done; \
 	fi
 	@echo "$(BLUE)  Skills → $(CLAUDE_DIR)/skills/$(1)/$(NC)"
-	@if [ -d "$(1)/skills" ]; then \
-		for skilldir in $(1)/skills/*/; do \
+	@if [ -d "$(2)/skills" ]; then \
+		for skilldir in $(2)/skills/*/; do \
 			[ -d "$$skilldir" ] || continue; \
 			echo "    $(MODE): $$(basename $$skilldir)"; \
 		done; \
@@ -244,7 +259,7 @@ endif
 
 $(MODULES):
 ifeq ($(filter install,$(MAKECMDGOALS)),install)
-	$(call install_module,$@)
+	$(call install_module,$@,$(call module_path,$@))
 endif
 
 # Uninstall all or specific module(s)
@@ -261,32 +276,32 @@ uninstall-module:
 .PHONY: check
 check:
 	@echo "$(BLUE)Checking installation status...$(NC)"
-	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) check-module MODULE=$(mod) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
+	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) check-module MODULE=$(mod) MODULE_PATH=$($(mod)_PATH) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
 
 .PHONY: check-module
 check-module:
-	$(call check_module,$(MODULE))
+	$(call check_module,$(MODULE),$(MODULE_PATH))
 
 # Fix broken symlinks
 .PHONY: fix
 fix:
 	@echo "$(BLUE)Repairing installations...$(NC)"
-	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) fix-module MODULE=$(mod) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
+	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) fix-module MODULE=$(mod) MODULE_PATH=$($(mod)_PATH) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
 	@echo "$(GREEN)✓ Repairs complete$(NC)"
 
 .PHONY: fix-module
 fix-module:
-	$(call install_module,$(MODULE))
+	$(call install_module,$(MODULE),$(MODULE_PATH))
 
 # List what would be installed (dry-run)
 .PHONY: list
 list:
 	@echo "$(BLUE)Installation preview for: $(CLAUDE_DIR)$(NC)"
-	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) list-module MODULE=$(mod) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
+	@$(foreach mod,$(SELECTED_MODULES),$(MAKE) list-module MODULE=$(mod) MODULE_PATH=$($(mod)_PATH) CLAUDE_DIR=$(CLAUDE_DIR) MODE=$(MODE);)
 
 .PHONY: list-module
 list-module:
-	$(call list_module,$(MODULE))
+	$(call list_module,$(MODULE),$(MODULE_PATH))
 
 # Clean build artifacts
 .PHONY: clean
@@ -300,15 +315,6 @@ clean:
 .PHONY: manifest
 manifest:
 	@echo "$(BLUE)Updating plugin manifests...$(NC)"
-	@# Root plugin
-	@echo "$(BLUE)→ Root plugin (.claude-plugin/plugin.json)$(NC)"
-	@agents=$$(find agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^/.\//' | jq -R . | jq -s .); \
-	commands=$$(find commands -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^/.\//' | jq -R . | jq -s .); \
-	jq --argjson agents "$$agents" --argjson commands "$$commands" \
-		'.agents = (if ($$agents | length) > 0 then $$agents else null end) | .commands = (if ($$commands | length) > 0 then $$commands else null end) | del(.agents | nulls) | del(.commands | nulls)' \
-		.claude-plugin/plugin.json > .claude-plugin/plugin.json.tmp && \
-	mv .claude-plugin/plugin.json.tmp .claude-plugin/plugin.json
-	@echo "$(GREEN)    ✓ Updated root manifest$(NC)"
 	@# Claire plugin
 	@echo "$(BLUE)→ Claire plugin (claire/.claude-plugin/plugin.json)$(NC)"
 	@agents=$$(find claire/agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^claire\//.\//g' | jq -R . | jq -s .); \
@@ -318,6 +324,23 @@ manifest:
 		claire/.claude-plugin/plugin.json > claire/.claude-plugin/plugin.json.tmp && \
 	mv claire/.claude-plugin/plugin.json.tmp claire/.claude-plugin/plugin.json
 	@echo "$(GREEN)    ✓ Updated claire manifest$(NC)"
+	@# Working-tree plugin
+	@echo "$(BLUE)→ Working-tree plugin (workflows/working-tree/.claude-plugin/plugin.json)$(NC)"
+	@agents=$$(find workflows/working-tree/agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^workflows\/working-tree\//.\//g' | jq -R . | jq -s .); \
+	commands=$$(find workflows/working-tree/commands -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^workflows\/working-tree\//.\//g' | jq -R . | jq -s .); \
+	jq --argjson agents "$$agents" --argjson commands "$$commands" \
+		'.agents = (if ($$agents | length) > 0 then $$agents else null end) | .commands = (if ($$commands | length) > 0 then $$commands else null end) | del(.agents | nulls) | del(.commands | nulls)' \
+		workflows/working-tree/.claude-plugin/plugin.json > workflows/working-tree/.claude-plugin/plugin.json.tmp && \
+	mv workflows/working-tree/.claude-plugin/plugin.json.tmp workflows/working-tree/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated working-tree manifest$(NC)"
+	@# Terraform plugin
+	@echo "$(BLUE)→ Terraform plugin (skills/terraform/.claude-plugin/plugin.json)$(NC)"
+	@agents=$$(find skills/terraform/agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^skills\/terraform\//.\//g' | jq -R . | jq -s .); \
+	jq --argjson agents "$$agents" \
+		'.agents = (if ($$agents | length) > 0 then $$agents else null end) | del(.agents | nulls)' \
+		skills/terraform/.claude-plugin/plugin.json > skills/terraform/.claude-plugin/plugin.json.tmp && \
+	mv skills/terraform/.claude-plugin/plugin.json.tmp skills/terraform/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated terraform manifest$(NC)"
 	@echo "$(GREEN)✓ Manifests updated$(NC)"
 
 # Show unreleased changes for changelog
@@ -348,6 +371,12 @@ version:
 	@jq '.version = "$(V)"' claire/.claude-plugin/plugin.json > claire/.claude-plugin/plugin.json.tmp && \
 		mv claire/.claude-plugin/plugin.json.tmp claire/.claude-plugin/plugin.json
 	@echo "$(GREEN)    ✓ Updated claire plugin$(NC)"
+	@jq '.version = "$(V)"' workflows/working-tree/.claude-plugin/plugin.json > workflows/working-tree/.claude-plugin/plugin.json.tmp && \
+		mv workflows/working-tree/.claude-plugin/plugin.json.tmp workflows/working-tree/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated working-tree plugin$(NC)"
+	@jq '.version = "$(V)"' skills/terraform/.claude-plugin/plugin.json > skills/terraform/.claude-plugin/plugin.json.tmp && \
+		mv skills/terraform/.claude-plugin/plugin.json.tmp skills/terraform/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated terraform plugin$(NC)"
 	@echo "$(GREEN)✓ Version bumped to $(V)$(NC)"
 	@echo "$(YELLOW)Don't forget to update CHANGELOG.md!$(NC)"
 

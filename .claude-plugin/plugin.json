@@ -1,15 +1,18 @@
 {
   "name": "waypoint",
-  "description": "Technology-specific agents, commands, and skills for infrastructure and development workflows",
-  "version": "1.0.0",
+  "description": "Claude Code plugins organized into workflows (operational tooling) and skills (domain knowledge)",
+  "version": "1.1.0",
   "repository": "https://github.com/poindexter12/waypoint",
   "license": "MIT",
   "keywords": [
-    "terraform",
-    "infrastructure",
-    "iac"
+    "claude-code",
+    "workflows",
+    "skills",
+    "plugins"
   ],
-  "agents": [
-    "./agents/terraform.md"
+  "plugins": [
+    "./workflows/working-tree",
+    "./skills/terraform",
+    "./claire"
   ]
 }

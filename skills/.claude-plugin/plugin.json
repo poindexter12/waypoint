@@ -1,0 +1,16 @@
+{
+  "name": "terraform",
+  "description": "Terraform and infrastructure-as-code knowledge - HCL patterns, provider configurations, state management, and best practices",
+  "version": "1.0.0",
+  "repository": "https://github.com/poindexter12/waypoint",
+  "license": "MIT",
+  "keywords": [
+    "terraform",
+    "infrastructure",
+    "iac",
+    "proxmox"
+  ],
+  "agents": [
+    "./agents/terraform.md"
+  ]
+}

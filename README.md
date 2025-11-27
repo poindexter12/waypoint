@@ -1,16 +1,21 @@
 # Waypoint
 
-**Modular, reusable Claude Code configurations for common development workflows.**
+**Modular Claude Code plugins organized into workflows and skills.**
 
-Waypoint is a collection of Claude agents, commands, and skills that can be installed globally or per-project, providing consistent AI-assisted tooling across your development environment. Each module is self-contained, well-documented, and easy to install via a simple Makefile.
+Waypoint is a collection of Claude agents, commands, and skills organized into two categories:
+
+- **Workflows**: Operational tooling that enhances how you work with Claude Code (e.g., git worktree management)
+- **Skills**: Domain knowledge that helps Claude understand specific technologies (e.g., Terraform, Proxmox)
+
+Each plugin is self-contained with its own `.claude-plugin/plugin.json` manifest.
 
 ## Philosophy
 
-- **Modular**: Each module is independent and can be installed separately
-- **Namespaced**: Agents, commands, and skills are organized by module (e.g., `@working-tree:manager`)
+- **Workflows vs Skills**: Clear separation between operational tooling and domain knowledge
+- **Modular**: Each plugin is independent and can be installed separately
+- **Namespaced**: Agents, commands, and skills are organized by plugin (e.g., `@working-tree:consultant`)
 - **Reusable**: Clone once, use everywhere via symlinks or copies
 - **Maintainable**: Simple Makefile-based installation and management
-- **Project-agnostic**: Install globally to `~/.claude/` or per-project as needed
 
 ## Quick Start
 
@@ -38,26 +43,40 @@ make check
 make help
 ```
 
-## Available Modules
+## Available Plugins
 
-### [working-tree](./working-tree/README.md)
+### Workflows
+
+Operational tooling that enhances development workflows.
+
+#### [working-tree](./workflows/working-tree/README.md)
 
 Git worktree management with AI context tracking. Creates isolated development environments with structured metadata that helps Claude understand your workflow.
 
 **Commands**: `/working-tree:new`, `/working-tree:status`, `/working-tree:list`, `/working-tree:destroy`, `/working-tree:adopt`
-**Agents**: `@working-tree:manager`
+**Agents**: `@working-tree:consultant`
+**Skills**: `worktree-guide`
 
-See [working-tree/README.md](./working-tree/README.md) for detailed documentation.
+### Skills
 
-### [claire](./claire/README.md)
+Domain knowledge for specific technologies.
 
-Meta-agent system for creating and optimizing Claude Code components (agents and commands). Includes a coordinator to help decide what to build and two specialized author agents. For skills, the coordinator delegates to the `skill-creator` skill from the anthropic-agent-skills plugin.
+#### [terraform](./skills/terraform/)
+
+Terraform and infrastructure-as-code knowledge. HCL patterns, provider configurations, state management, and best practices. Includes Proxmox-specific references.
+
+**Agents**: `@terraform`
+**Skills**: `terraform` (with Proxmox references)
+
+### Meta-Tooling
+
+#### [claire](./claire/README.md)
+
+Meta-agent system for creating and optimizing Claude Code components (agents and commands). Includes a coordinator to help decide what to build and specialized author agents.
 
 **Commands**: `/claire:fetch-docs`
 **Agents**: `@claire:coordinator`, `@claire:author-agent`, `@claire:author-command`
 **Skills**: `doc-validator`
-
-See [claire/README.md](./claire/README.md) for detailed documentation.
 
 ## Installation
 
@@ -100,13 +119,38 @@ make CLAUDE_DIR=/custom/path MODE=copy install working-tree
 
 ### Directory Structure
 
-After installation, your Claude directory will look like:
+**Repository structure:**
+
+```
+waypoint/
+├── .claude-plugin/plugin.json    # Root plugin index
+├── workflows/                    # Operational tooling
+│   └── working-tree/
+│       ├── .claude-plugin/plugin.json
+│       ├── agents/
+│       ├── commands/
+│       └── skills/
+├── skills/                       # Domain knowledge
+│   └── terraform/
+│       ├── .claude-plugin/plugin.json
+│       ├── agents/
+│       └── references/
+└── claire/                       # Meta-tooling
+    ├── .claude-plugin/plugin.json
+    ├── agents/
+    ├── commands/
+    └── skills/
+```
+
+**After installation**, your Claude directory will look like:
 
 ```
 ~/.claude/
 ├── agents/
 │   ├── working-tree/
-│   │   └── manager.md
+│   │   └── consultant.md
+│   ├── terraform/
+│   │   └── terraform.md
 │   └── claire/
 │       ├── coordinator.md
 │       ├── author-agent.md
@@ -121,10 +165,10 @@ After installation, your Claude directory will look like:
 │   └── claire/
 │       └── fetch-docs.md
 └── skills/
+    ├── working-tree/
+    │   └── worktree-guide/
     └── claire/
         └── doc-validator/
-            ├── SKILL.md
-            └── REFERENCE.md
 ```
 
 ## Makefile Reference
@@ -258,36 +302,45 @@ class TestNewFeature(WaypointTestCase):
 
 ## Development
 
-### Adding a New Module
+### Adding a New Plugin
 
-1. Create a directory for your module: `mkdir my-module`
-2. Add subdirectories as needed: `mkdir my-module/agents my-module/commands my-module/skills`
-3. Create agent/command files as `.md` files in the respective directories
-4. Create skills as subdirectories with a `SKILL.md` file: `my-module/skills/skill-name/SKILL.md`
-5. Create `my-module/README.md` documenting your module
-6. Add module to `MODULES` list in root `Makefile`
-7. Test installation: `make install my-module`
+**For a new workflow** (operational tooling):
+```bash
+mkdir -p workflows/my-workflow/{agents,commands,skills}
+mkdir workflows/my-workflow/.claude-plugin
+```
 
-That's it! No module-specific Makefile needed - the root Makefile handles everything.
+**For a new skill** (domain knowledge):
+```bash
+mkdir -p skills/my-skill/{agents,references}
+mkdir skills/my-skill/.claude-plugin
+```
 
-### Module Structure
+Then:
+1. Create agent/command files as `.md` files in the respective directories
+2. Create a `.claude-plugin/plugin.json` manifest
+3. Add the module name and path to `Makefile` (MODULES list and path mapping)
+4. Test installation: `make install my-module`
+
+### Plugin Structure
 
 ```
-my-module/
-├── README.md             # Module documentation
+my-plugin/
+├── .claude-plugin/
+│   └── plugin.json      # Plugin manifest (required)
+├── README.md            # Plugin documentation
 ├── agents/
-│   └── *.md             # Agent definitions (optional)
+│   └── *.md            # Agent definitions (optional)
 ├── commands/
-│   └── *.md             # Command definitions (optional)
+│   └── *.md            # Command definitions (optional)
 └── skills/
-    └── skill-name/      # Skill directories (optional)
-        ├── SKILL.md     # Required: skill definition
+    └── skill-name/     # Skill directories (optional)
+        ├── SKILL.md    # Required: skill definition
         ├── REFERENCE.md # Optional: detailed documentation
-        ├── scripts/     # Optional: helper scripts
-        └── templates/   # Optional: file templates
+        └── templates/  # Optional: file templates
 ```
 
-Modules can have agents, commands, skills, or any combination. The root Makefile automatically discovers and installs all files from these directories.
+Plugins can have agents, commands, skills, or any combination. The root Makefile handles installation based on the module path mappings.
 
 ### Testing Changes
 

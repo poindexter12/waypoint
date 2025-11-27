@@ -8,19 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Official Claude Code plugin format with `.claude-plugin/plugin.json` manifests
-- Root waypoint plugin with terraform agent and skill
-- Claire as standalone sub-plugin
+- `workflows/` directory for operational tooling (working-tree)
+- `skills/` directory for domain knowledge (terraform)
+- Each plugin now self-contained with its own `.claude-plugin/plugin.json`
 - `make manifest` target to auto-populate plugin.json from directory contents
 - Terraform skill with Proxmox-specific references
 
 ### Changed
-- Reorganized structure: technology-specific content at root level
-- Claire agents optimized for component authoring
+
+- **BREAKING**: Reorganized repository structure into workflows vs skills
+  - `working-tree/` → `workflows/working-tree/`
+  - `terraform/` (agent + skill) → `skills/terraform/`
+- Root plugin now serves as index pointing to sub-plugins
+- Makefile updated with module path mappings for new structure
+- Claire remains at root level as meta-tooling
+
+### Migration
+
+If you have existing symlinks, run `make fix` to update them to the new paths.
 
 ## [0.1.0] - 2025-11-23
 
 ### Added
+
 - Initial release
 - Working-tree module for git worktree management with AI context
 - Claire module for Claude Code component authoring
