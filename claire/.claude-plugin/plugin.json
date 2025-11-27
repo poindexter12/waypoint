@@ -18,5 +18,8 @@
   ],
   "commands": [
     "./commands/fetch-docs.md"
+  ],
+  "skills": [
+    "./skills/doc-validator"
   ]
 }

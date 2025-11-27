@@ -16,5 +16,11 @@
     "./agents/docker-compose.md",
     "./agents/proxmox.md",
     "./agents/terraform.md"
+  ],
+  "skills": [
+    "./skills/terraform",
+    "./skills/ansible",
+    "./skills/docker",
+    "./skills/proxmox"
   ]
 }

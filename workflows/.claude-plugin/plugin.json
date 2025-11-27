@@ -19,5 +19,8 @@
     "./commands/list.md",
     "./commands/new.md",
     "./commands/status.md"
+  ],
+  "skills": [
+    "./skills/working-tree"
   ]
 }

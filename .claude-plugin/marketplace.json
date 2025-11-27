@@ -12,31 +12,19 @@
       "name": "workflows",
       "description": "Operational tooling for development workflows - git worktree management with AI context tracking",
       "source": "./workflows",
-      "strict": false,
-      "skills": [
-        "./workflows/skills/working-tree"
-      ]
+      "strict": true
     },
     {
       "name": "technologies",
       "description": "Domain knowledge for infrastructure tools - Terraform, Ansible, Docker, Proxmox",
       "source": "./technologies",
-      "strict": false,
-      "skills": [
-        "./technologies/skills/terraform",
-        "./technologies/skills/ansible",
-        "./technologies/skills/docker",
-        "./technologies/skills/proxmox"
-      ]
+      "strict": true
     },
     {
       "name": "claire",
       "description": "Claude Code component authoring system - agents for creating and optimizing agents, commands, and skills",
       "source": "./claire",
-      "strict": false,
-      "skills": [
-        "./claire/skills/doc-validator"
-      ]
+      "strict": true
     }
   ]
 }
