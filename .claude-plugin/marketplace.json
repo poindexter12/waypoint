@@ -4,17 +4,29 @@
     "name": "Joe Seymour"
   },
   "metadata": {
-    "description": "Waypoint plugins for Claude Code",
-    "version": "1.0.0"
+    "description": "Waypoint plugins for Claude Code - workflows and technologies",
+    "version": "1.1.0"
   },
   "plugins": [
     {
-      "name": "waypoint",
-      "description": "Technology-specific agents, commands, and skills for infrastructure and development workflows",
-      "source": "./",
+      "name": "workflows",
+      "description": "Operational tooling for development workflows - git worktree management with AI context tracking",
+      "source": "./workflows",
       "strict": false,
       "skills": [
-        "./skills/terraform"
+        "./workflows/skills/working-tree"
+      ]
+    },
+    {
+      "name": "technologies",
+      "description": "Domain knowledge for infrastructure tools - Terraform, Ansible, Docker, Proxmox",
+      "source": "./technologies",
+      "strict": false,
+      "skills": [
+        "./technologies/skills/terraform",
+        "./technologies/skills/ansible",
+        "./technologies/skills/docker",
+        "./technologies/skills/proxmox"
       ]
     },
     {
