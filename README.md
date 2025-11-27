@@ -14,34 +14,21 @@ Each category is a plugin with its own `.claude-plugin/plugin.json` manifest.
 - **Workflows vs Technologies**: Clear separation between operational tooling and domain knowledge
 - **Modular**: Each plugin is independent and can be installed separately
 - **Namespaced**: Agents, commands, and skills are organized by plugin
-- **Reusable**: Clone once, use everywhere via symlinks or copies
-- **Maintainable**: Simple Makefile-based installation and management
+- **Reusable**: Clone once, use everywhere via the Claude Code plugin system
 
-## Quick Start
+## Installation
+
+Install Waypoint as a Claude Code plugin:
 
 ```bash
 # Clone the repository
 git clone git@github.com:poindexter12/waypoint.git
-cd waypoint
 
-# Install everything to ~/.claude/
-make install
-
-# Or install a specific module
-make install workflows
-
-# Or install to a project directory
-make CLAUDE_DIR=/path/to/project/.claude install
-
-# Copy files instead of symlinking
-make MODE=copy install
-
-# Verify installation
-make check
-
-# See all available commands
-make help
+# The plugin system will automatically discover and load the plugins
+# Just ensure the repository is accessible to Claude Code
 ```
+
+Waypoint uses the Claude Code plugin system. Each subdirectory (`workflows/`, `technologies/`, `claire/`) contains a `.claude-plugin/plugin.json` manifest that defines the available agents, commands, and skills.
 
 ## Available Plugins
 
@@ -77,48 +64,7 @@ Tools for creating and optimizing Claude Code components.
 **Agents**: `coordinator`, `author-agent`, `author-command`
 **Skills**: `doc-validator`
 
-## Installation
-
-### Requirements
-
-- Git
-- Make
-- A Claude-compatible AI tool (Claude Code, Cursor, etc.)
-
-### Installation Options
-
-Waypoint supports two installation modes:
-
-1. **Symlink mode** (default): Creates symbolic links from this repository to your Claude directory
-   - Changes to this repo are immediately reflected
-   - Good for development and testing
-
-2. **Copy mode**: Copies files to your Claude directory
-   - Changes require reinstallation
-   - Good for stable, production use
-
-### Installation Targets
-
-```bash
-# Install all modules
-make install
-
-# Install specific module
-make install working-tree
-
-# Install to custom directory (e.g., project-specific)
-make CLAUDE_DIR=./.claude install
-
-# Use copy mode instead of symlinks
-make MODE=copy install
-
-# Combine options
-make CLAUDE_DIR=/custom/path MODE=copy install workflows
-```
-
-### Directory Structure
-
-**Repository structure:**
+## Directory Structure
 
 ```
 waypoint/
@@ -139,161 +85,31 @@ waypoint/
     └── skills/
 ```
 
-**After installation**, your Claude directory will look like:
-
-```
-~/.claude/
-├── agents/
-│   ├── workflows/
-│   │   └── consultant.md
-│   ├── technologies/
-│   │   ├── terraform.md
-│   │   ├── ansible.md
-│   │   ├── docker-compose.md
-│   │   └── proxmox.md
-│   └── claire/
-│       └── *.md
-├── commands/
-│   ├── workflows/
-│   │   └── *.md (adopt, destroy, list, new, status)
-│   └── claire/
-│       └── fetch-docs.md
-└── skills/
-    ├── workflows/
-    │   └── working-tree/
-    ├── technologies/
-    │   └── */ (terraform, ansible, docker, proxmox)
-    └── claire/
-        └── doc-validator/
-```
-
 ## Makefile Reference
+
+The Makefile provides tools for managing plugin manifests and versions.
 
 ### Targets
 
 | Target | Description |
 |--------|-------------|
 | `help` | Show all available commands (default) |
-| `install [MODULE]` | Install all or specific module |
-| `uninstall [MODULE]` | Remove installed modules |
-| `check [MODULE]` | Verify installation is correct |
-| `fix [MODULE]` | Repair broken or missing symlinks |
-| `list [MODULE]` | Show what would be installed (dry-run) |
-| `clean` | Remove local build artifacts |
-
-### Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `CLAUDE_DIR` | `~/.claude` | Installation directory |
-| `MODE` | `symlink` | Installation mode (`symlink` or `copy`) |
+| `manifest` | Update plugin.json files from directory contents |
+| `version V=x.y.z` | Bump version in all plugin.json files |
+| `changelog-preview` | Show commits since last version tag |
+| `clean` | Remove build artifacts |
 
 ### Examples
 
 ```bash
-# Preview what would be installed
-make list
+# Update all plugin.json manifests from directory contents
+make manifest
 
-# Install everything with default settings
-make install
+# Bump all versions to 1.2.0
+make version V=1.2.0
 
-# Install to project directory
-make CLAUDE_DIR=$(pwd)/.claude install
-
-# Copy instead of symlink
-make MODE=copy install
-
-# Check if installation is working
-make check
-
-# Fix broken symlinks
-make fix
-
-# Uninstall everything
-make uninstall
-
-# Uninstall specific module
-make uninstall working-tree
-```
-
-## Testing
-
-Waypoint includes a comprehensive test suite to ensure all functionality works correctly.
-
-### Requirements
-
-- Python 3.7+
-- [uv](https://github.com/astral-sh/uv) (will be installed automatically if not present)
-
-### Running Tests
-
-```bash
-# Run the full test suite
-make -f Makefile.test test
-
-# Set up test environment only
-make -f Makefile.test setup
-
-# Clean up test environment
-make -f Makefile.test clean
-```
-
-### What Gets Tested
-
-The test suite validates:
-
-- ✅ **Installation**: Both symlink and copy modes
-- ✅ **Module-specific operations**: Installing individual modules
-- ✅ **Symlink targets**: Correct source file linking
-- ✅ **Check command**: Validates installations and detects broken links
-- ✅ **Uninstall**: Complete removal of files and directories
-- ✅ **Fix command**: Repairs missing files and broken symlinks
-- ✅ **Idempotency**: Operations can be run multiple times safely
-- ✅ **Custom directories**: Non-default CLAUDE_DIR locations
-
-### Test Output
-
-The test suite provides detailed output:
-
-```
-======================================================================
-Waypoint Test Suite
-======================================================================
-
-test_check_broken_symlink (__main__.TestCheck) ... ok
-test_check_missing_installation (__main__.TestCheck) ... ok
-test_check_valid_installation (__main__.TestCheck) ... ok
-test_install_copy_mode (__main__.TestCopyInstallation) ... ok
-...
-
-----------------------------------------------------------------------
-Ran 15 tests in 2.341s
-
-OK
-======================================================================
-✓ All tests passed
-======================================================================
-```
-
-### Test Environment
-
-- Tests run in isolated temporary directories (`/tmp/waypoint-tests`)
-- All test artifacts are automatically cleaned up
-- Tests use `uv` and a virtual environment to ensure isolation
-- No modifications are made to your actual `~/.claude/` directory
-
-### Writing New Tests
-
-When adding new modules or features, add corresponding tests to `tests/test_waypoint.py`. Follow the existing test patterns:
-
-```python
-class TestNewFeature(WaypointTestCase):
-    """Test description."""
-
-    def test_specific_behavior(self):
-        """Test that specific behavior works correctly."""
-        # Test implementation
-        pass
+# Preview unreleased changes for changelog
+make changelog-preview
 ```
 
 ## Development
@@ -329,19 +145,6 @@ plugin-category/
         ├── SKILL.md    # Required: skill definition
         ├── REFERENCE.md # Optional: detailed documentation
         └── references/ # Optional: additional docs
-```
-
-### Testing Changes
-
-```bash
-# Install to a test directory
-make CLAUDE_DIR=/tmp/test-claude install
-
-# Check installation
-make CLAUDE_DIR=/tmp/test-claude check
-
-# Clean up
-make CLAUDE_DIR=/tmp/test-claude uninstall
 ```
 
 ### Slash Command and Agent File Format
@@ -406,58 +209,6 @@ allowed-tools: Read, Grep, Glob
 Validates documentation files to ensure they are complete...
 ```
 
-## Troubleshooting
-
-### Broken Symlinks
-
-If symlinks are broken (e.g., you moved the waypoint directory):
-
-```bash
-make fix
-```
-
-### Installation Not Detected
-
-Verify installation status:
-
-```bash
-make check
-```
-
-If files are missing, reinstall:
-
-```bash
-make install
-```
-
-### Symlinks vs Copies
-
-If you need to move the waypoint repository:
-
-1. **With symlinks**: Run `make fix` after moving
-2. **With copies**: You'll need to reinstall with `make install`
-
-Consider using copy mode if you plan to move the repository frequently.
-
-### Module Not Loading in Claude
-
-1. Verify installation: `make check`
-2. Check Claude is looking in the right directory
-3. Restart Claude Code if needed
-4. Check file permissions: `ls -la ~/.claude/agents/working-tree/`
-
-### Permission Denied
-
-If you get permission errors:
-
-```bash
-# Fix permissions on Claude directory
-chmod -R u+w ~/.claude/
-
-# Reinstall
-make install
-```
-
 ## Contributing
 
 Contributions are welcome! To contribute:
@@ -465,7 +216,7 @@ Contributions are welcome! To contribute:
 1. Fork the repository
 2. Create a feature branch
 3. Add or improve a module
-4. Test thoroughly with `make check`
+4. Run `make manifest` to update plugin.json files
 5. Submit a pull request
 
 ## License
