@@ -31,6 +31,8 @@ help:
 	@echo "  fix [MOD]         Repair broken or missing symlinks"
 	@echo "  list [MOD]        Show what would be installed (dry-run)"
 	@echo "  manifest          Update plugin.json files from directory contents"
+	@echo "  changelog-preview Show commits since last version tag"
+	@echo "  version V=x.y.z   Bump version in all plugin.json files"
 	@echo "  clean             Remove local build artifacts"
 	@echo ""
 	@echo "$(GREEN)Testing:$(NC)"
@@ -317,6 +319,37 @@ manifest:
 	mv claire/.claude-plugin/plugin.json.tmp claire/.claude-plugin/plugin.json
 	@echo "$(GREEN)    ✓ Updated claire manifest$(NC)"
 	@echo "$(GREEN)✓ Manifests updated$(NC)"
+
+# Show unreleased changes for changelog
+.PHONY: changelog-preview
+changelog-preview:
+	@echo "$(BLUE)Unreleased changes since last version:$(NC)"
+	@echo ""
+	@last_tag=$$(git describe --tags --abbrev=0 2>/dev/null || echo ""); \
+	if [ -n "$$last_tag" ]; then \
+		echo "$(YELLOW)Since $$last_tag:$(NC)"; \
+		git log --oneline $$last_tag..HEAD; \
+	else \
+		echo "$(YELLOW)All commits (no tags found):$(NC)"; \
+		git log --oneline; \
+	fi
+
+# Bump version in plugin.json files
+.PHONY: version
+version:
+	@if [ -z "$(V)" ]; then \
+		echo "$(RED)Usage: make version V=x.y.z$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(BLUE)Bumping version to $(V)...$(NC)"
+	@jq '.version = "$(V)"' .claude-plugin/plugin.json > .claude-plugin/plugin.json.tmp && \
+		mv .claude-plugin/plugin.json.tmp .claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated root plugin$(NC)"
+	@jq '.version = "$(V)"' claire/.claude-plugin/plugin.json > claire/.claude-plugin/plugin.json.tmp && \
+		mv claire/.claude-plugin/plugin.json.tmp claire/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated claire plugin$(NC)"
+	@echo "$(GREEN)✓ Version bumped to $(V)$(NC)"
+	@echo "$(YELLOW)Don't forget to update CHANGELOG.md!$(NC)"
 
 # Prevent module names from being interpreted as files
 .PHONY: $(MODULES)
