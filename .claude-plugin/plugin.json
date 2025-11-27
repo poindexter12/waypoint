@@ -1,5 +1,15 @@
 {
   "name": "waypoint",
   "description": "Technology-specific agents, commands, and skills for infrastructure and development workflows",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "repository": "https://github.com/poindexter12/waypoint",
+  "license": "MIT",
+  "keywords": [
+    "terraform",
+    "infrastructure",
+    "iac"
+  ],
+  "agents": [
+    "./agents/terraform.md"
+  ]
 }

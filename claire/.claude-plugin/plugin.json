@@ -1,5 +1,22 @@
 {
   "name": "claire",
   "description": "Claude Code component authoring system - agents for creating and optimizing agents, commands, and skills",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "repository": "https://github.com/poindexter12/waypoint",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "agents",
+    "commands",
+    "skills",
+    "authoring"
+  ],
+  "agents": [
+    "./agents/author-agent.md",
+    "./agents/author-command.md",
+    "./agents/coordinator.md"
+  ],
+  "commands": [
+    "./commands/fetch-docs.md"
+  ]
 }

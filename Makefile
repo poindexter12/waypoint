@@ -30,6 +30,7 @@ help:
 	@echo "  check [MOD]       Verify installation is correct"
 	@echo "  fix [MOD]         Repair broken or missing symlinks"
 	@echo "  list [MOD]        Show what would be installed (dry-run)"
+	@echo "  manifest          Update plugin.json files from directory contents"
 	@echo "  clean             Remove local build artifacts"
 	@echo ""
 	@echo "$(GREEN)Testing:$(NC)"
@@ -292,6 +293,30 @@ clean:
 	@find . -name "*.tmp" -type f -delete
 	@find . -name ".DS_Store" -type f -delete
 	@echo "$(GREEN)✓ Clean complete$(NC)"
+
+# Update plugin.json manifests from directory contents
+.PHONY: manifest
+manifest:
+	@echo "$(BLUE)Updating plugin manifests...$(NC)"
+	@# Root plugin
+	@echo "$(BLUE)→ Root plugin (.claude-plugin/plugin.json)$(NC)"
+	@agents=$$(find agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^/.\//' | jq -R . | jq -s .); \
+	commands=$$(find commands -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^/.\//' | jq -R . | jq -s .); \
+	jq --argjson agents "$$agents" --argjson commands "$$commands" \
+		'.agents = (if ($$agents | length) > 0 then $$agents else null end) | .commands = (if ($$commands | length) > 0 then $$commands else null end) | del(.agents | nulls) | del(.commands | nulls)' \
+		.claude-plugin/plugin.json > .claude-plugin/plugin.json.tmp && \
+	mv .claude-plugin/plugin.json.tmp .claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated root manifest$(NC)"
+	@# Claire plugin
+	@echo "$(BLUE)→ Claire plugin (claire/.claude-plugin/plugin.json)$(NC)"
+	@agents=$$(find claire/agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^claire\//.\//g' | jq -R . | jq -s .); \
+	commands=$$(find claire/commands -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^claire\//.\//g' | jq -R . | jq -s .); \
+	jq --argjson agents "$$agents" --argjson commands "$$commands" \
+		'.agents = (if ($$agents | length) > 0 then $$agents else null end) | .commands = (if ($$commands | length) > 0 then $$commands else null end) | del(.agents | nulls) | del(.commands | nulls)' \
+		claire/.claude-plugin/plugin.json > claire/.claude-plugin/plugin.json.tmp && \
+	mv claire/.claude-plugin/plugin.json.tmp claire/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated claire manifest$(NC)"
+	@echo "$(GREEN)✓ Manifests updated$(NC)"
 
 # Prevent module names from being interpreted as files
 .PHONY: $(MODULES)
