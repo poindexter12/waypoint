@@ -6,100 +6,72 @@ This document provides context and guidelines for Claude when working on the Way
 
 **Waypoint** is a collection of Claude Code plugins organized into two categories:
 
-- **Workflows** (`workflows/`): Operational tooling that enhances how you work with Claude Code
-- **Skills** (`skills/`): Domain knowledge that helps Claude understand specific technologies
+- **Workflows** (`workflows/`): Operational tooling (git worktree management)
+- **Technologies** (`technologies/`): Domain knowledge (Terraform, Ansible, Docker, Proxmox)
 
-Each plugin is self-contained with its own `.claude-plugin/plugin.json` manifest.
+Each category is a plugin with its own `.claude-plugin/plugin.json` manifest.
 
 ## Repository Structure
 
 ```
 waypoint/
 ├── .claude-plugin/plugin.json    # Root plugin index
-├── Makefile                      # Installation and management
 ├── workflows/                    # Operational tooling
-│   └── working-tree/
-│       ├── .claude-plugin/plugin.json
-│       ├── agents/consultant.md
-│       ├── commands/*.md
-│       └── skills/worktree-guide/
-├── skills/                       # Domain knowledge
-│   └── terraform/
-│       ├── .claude-plugin/plugin.json
-│       ├── agents/terraform.md
-│       ├── SKILL.md
-│       └── references/
+│   ├── .claude-plugin/plugin.json
+│   ├── agents/consultant.md
+│   ├── commands/*.md
+│   └── skills/working-tree/
+├── technologies/                 # Domain knowledge
+│   ├── .claude-plugin/plugin.json
+│   ├── agents/*.md
+│   └── skills/*/
 └── claire/                       # Meta-tooling
     ├── .claude-plugin/plugin.json
-    ├── agents/*.md
-    ├── commands/*.md
-    └── skills/doc-validator/
+    ├── agents/
+    ├── commands/
+    └── skills/
 ```
 
-## Plugin Architecture
-
-### Plugin Structure
-
-```
-plugin-name/
-├── .claude-plugin/
-│   └── plugin.json      # Plugin manifest (required)
-├── README.md            # Plugin documentation
-├── agents/
-│   └── *.md            # Agent definitions
-├── commands/
-│   └── *.md            # Command definitions
-└── skills/
-    └── skill-name/     # Skill directories
-        └── SKILL.md    # Skill definition
-```
-
-### Makefile Configuration
-
-The root Makefile uses module path mappings:
+## Makefile Configuration
 
 ```makefile
-MODULES := working-tree claire terraform
+MODULES := workflows technologies claire
 
-working-tree_PATH := workflows/working-tree
+workflows_PATH := workflows
+technologies_PATH := technologies
 claire_PATH := claire
-terraform_PATH := skills/terraform
 ```
 
-## Adding a New Plugin
+## Adding Components
 
-**For a new workflow** (operational tooling):
-```bash
-mkdir -p workflows/my-workflow/{agents,commands,skills,.claude-plugin}
-# Create plugin.json, agents, commands as needed
-# Add to Makefile: my-workflow_PATH := workflows/my-workflow
-# Add to MODULES list
-```
+**Add a workflow component:**
+- Agents go in `workflows/agents/`
+- Commands go in `workflows/commands/`
+- Skills go in `workflows/skills/`
 
-**For a new skill** (domain knowledge):
-```bash
-mkdir -p skills/my-skill/{agents,references,.claude-plugin}
-# Create plugin.json, SKILL.md, agents as needed
-# Add to Makefile: my-skill_PATH := skills/my-skill
-# Add to MODULES list
-```
+**Add a technology:**
+- Agent: `technologies/agents/my-tech.md`
+- Skill: `technologies/skills/my-tech/SKILL.md`
+- References: `technologies/skills/my-tech/references/`
+
+Run `make manifest` after adding to update plugin.json files.
 
 ## Current Plugins
 
-### workflows/working-tree
+### workflows
 
 Git worktree management with AI context tracking.
 
-- **Agent**: `consultant.md` - Strategic guidance for worktree organization
-- **Commands**: `new.md`, `status.md`, `list.md`, `destroy.md`, `adopt.md`
-- **Skill**: `worktree-guide` - Quick reference and templates
+- **Agent**: `consultant.md`
+- **Commands**: `adopt.md`, `destroy.md`, `list.md`, `new.md`, `status.md`
+- **Skill**: `working-tree/`
 
-### skills/terraform
+### technologies
 
-Terraform and infrastructure-as-code knowledge.
+Domain knowledge for infrastructure tools.
 
-- **Agent**: `terraform.md` - IaC guidance
-- **Skill**: Terraform patterns with Proxmox references
+- **Agents**: `terraform.md`, `ansible.md`, `docker-compose.md`, `proxmox.md`
+- **Skills**: `terraform/`, `ansible/`, `docker/`, `proxmox/`
 
 ### claire
 
@@ -107,45 +79,15 @@ Meta-tooling for Claude Code component authoring.
 
 - **Agents**: `coordinator.md`, `author-agent.md`, `author-command.md`
 - **Commands**: `fetch-docs.md`
-- **Skill**: `doc-validator`
+- **Skill**: `doc-validator/`
 
 ## Testing
 
 ```bash
-# Test installation
 make CLAUDE_DIR=/tmp/test-claude install
-
-# Verify
 make CLAUDE_DIR=/tmp/test-claude check
-
-# Clean up
 make CLAUDE_DIR=/tmp/test-claude uninstall
 ```
-
-## File Format Reference
-
-**Plugin manifest** (`.claude-plugin/plugin.json`):
-```json
-{
-  "name": "plugin-name",
-  "description": "What this plugin does",
-  "version": "1.0.0",
-  "agents": ["./agents/agent.md"],
-  "commands": ["./commands/command.md"]
-}
-```
-
-**Agent files** (`agents/*.md`):
-- YAML frontmatter with `name`, `description`, optional `tools`, `model`, `permissionMode`
-- System prompt in markdown body
-
-**Command files** (`commands/*.md`):
-- YAML frontmatter with `description`, `argument-hint`, optional `allowed-tools`, `model`
-- Command prompt in markdown body
-
-**Skill files** (`skills/*/SKILL.md`):
-- YAML frontmatter with `name`, `description`
-- Skill knowledge in markdown body
 
 ---
 

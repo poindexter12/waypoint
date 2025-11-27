@@ -1,19 +1,19 @@
 # Waypoint
 
-**Modular Claude Code plugins organized into workflows and skills.**
+**Modular Claude Code plugins organized into workflows and technologies.**
 
 Waypoint is a collection of Claude agents, commands, and skills organized into two categories:
 
-- **Workflows**: Operational tooling that enhances how you work with Claude Code (e.g., git worktree management)
-- **Skills**: Domain knowledge that helps Claude understand specific technologies (e.g., Terraform, Proxmox)
+- **Workflows**: Operational tooling that enhances how you work with Claude Code (git worktree management)
+- **Technologies**: Domain knowledge for infrastructure tools (Terraform, Ansible, Docker, Proxmox)
 
-Each plugin is self-contained with its own `.claude-plugin/plugin.json` manifest.
+Each category is a plugin with its own `.claude-plugin/plugin.json` manifest.
 
 ## Philosophy
 
-- **Workflows vs Skills**: Clear separation between operational tooling and domain knowledge
+- **Workflows vs Technologies**: Clear separation between operational tooling and domain knowledge
 - **Modular**: Each plugin is independent and can be installed separately
-- **Namespaced**: Agents, commands, and skills are organized by plugin (e.g., `@working-tree:consultant`)
+- **Namespaced**: Agents, commands, and skills are organized by plugin
 - **Reusable**: Clone once, use everywhere via symlinks or copies
 - **Maintainable**: Simple Makefile-based installation and management
 
@@ -28,7 +28,7 @@ cd waypoint
 make install
 
 # Or install a specific module
-make install working-tree
+make install workflows
 
 # Or install to a project directory
 make CLAUDE_DIR=/path/to/project/.claude install
@@ -49,33 +49,32 @@ make help
 
 Operational tooling that enhances development workflows.
 
-#### [working-tree](./workflows/working-tree/README.md)
-
-Git worktree management with AI context tracking. Creates isolated development environments with structured metadata that helps Claude understand your workflow.
-
+**Agents**: `consultant` - Git worktree strategy and organization
 **Commands**: `/working-tree:new`, `/working-tree:status`, `/working-tree:list`, `/working-tree:destroy`, `/working-tree:adopt`
-**Agents**: `@working-tree:consultant`
-**Skills**: `worktree-guide`
+**Skills**: `working-tree` - Worktree patterns and templates
 
-### Skills
+### Technologies
 
-Domain knowledge for specific technologies.
+Domain knowledge for infrastructure tools.
 
-#### [terraform](./skills/terraform/)
+**Agents**:
+- `terraform` - Terraform/IaC patterns and best practices
+- `ansible` - Ansible playbooks and automation
+- `docker-compose` - Docker and container orchestration
+- `proxmox` - Proxmox virtualization platform
 
-Terraform and infrastructure-as-code knowledge. HCL patterns, provider configurations, state management, and best practices. Includes Proxmox-specific references.
+**Skills**:
+- `terraform` - HCL patterns, state management, Proxmox provider
+- `ansible` - Playbooks, inventory, modules
+- `docker` - Dockerfile, Compose, networking
+- `proxmox` - VMs, LXC, storage, clustering
 
-**Agents**: `@terraform`
-**Skills**: `terraform` (with Proxmox references)
+### Claire (Meta-Tooling)
 
-### Meta-Tooling
-
-#### [claire](./claire/README.md)
-
-Meta-agent system for creating and optimizing Claude Code components (agents and commands). Includes a coordinator to help decide what to build and specialized author agents.
+Tools for creating and optimizing Claude Code components.
 
 **Commands**: `/claire:fetch-docs`
-**Agents**: `@claire:coordinator`, `@claire:author-agent`, `@claire:author-command`
+**Agents**: `coordinator`, `author-agent`, `author-command`
 **Skills**: `doc-validator`
 
 ## Installation
@@ -114,7 +113,7 @@ make CLAUDE_DIR=./.claude install
 make MODE=copy install
 
 # Combine options
-make CLAUDE_DIR=/custom/path MODE=copy install working-tree
+make CLAUDE_DIR=/custom/path MODE=copy install workflows
 ```
 
 ### Directory Structure
@@ -125,16 +124,14 @@ make CLAUDE_DIR=/custom/path MODE=copy install working-tree
 waypoint/
 ├── .claude-plugin/plugin.json    # Root plugin index
 ├── workflows/                    # Operational tooling
-│   └── working-tree/
-│       ├── .claude-plugin/plugin.json
-│       ├── agents/
-│       ├── commands/
-│       └── skills/
-├── skills/                       # Domain knowledge
-│   └── terraform/
-│       ├── .claude-plugin/plugin.json
-│       ├── agents/
-│       └── references/
+│   ├── .claude-plugin/plugin.json
+│   ├── agents/consultant.md
+│   ├── commands/*.md
+│   └── skills/working-tree/
+├── technologies/                 # Domain knowledge
+│   ├── .claude-plugin/plugin.json
+│   ├── agents/*.md               # terraform, ansible, docker, proxmox
+│   └── skills/*/                 # Per-technology skills
 └── claire/                       # Meta-tooling
     ├── .claude-plugin/plugin.json
     ├── agents/
@@ -147,26 +144,25 @@ waypoint/
 ```
 ~/.claude/
 ├── agents/
-│   ├── working-tree/
+│   ├── workflows/
 │   │   └── consultant.md
-│   ├── terraform/
-│   │   └── terraform.md
+│   ├── technologies/
+│   │   ├── terraform.md
+│   │   ├── ansible.md
+│   │   ├── docker-compose.md
+│   │   └── proxmox.md
 │   └── claire/
-│       ├── coordinator.md
-│       ├── author-agent.md
-│       └── author-command.md
+│       └── *.md
 ├── commands/
-│   ├── working-tree/
-│   │   ├── new.md
-│   │   ├── status.md
-│   │   ├── list.md
-│   │   ├── destroy.md
-│   │   └── adopt.md
+│   ├── workflows/
+│   │   └── *.md (adopt, destroy, list, new, status)
 │   └── claire/
 │       └── fetch-docs.md
 └── skills/
-    ├── working-tree/
-    │   └── worktree-guide/
+    ├── workflows/
+    │   └── working-tree/
+    ├── technologies/
+    │   └── */ (terraform, ansible, docker, proxmox)
     └── claire/
         └── doc-validator/
 ```
@@ -302,45 +298,38 @@ class TestNewFeature(WaypointTestCase):
 
 ## Development
 
-### Adding a New Plugin
+### Adding Components
 
-**For a new workflow** (operational tooling):
-```bash
-mkdir -p workflows/my-workflow/{agents,commands,skills}
-mkdir workflows/my-workflow/.claude-plugin
-```
+**Add a new workflow agent/command:**
+- Add agent to `workflows/agents/`
+- Add commands to `workflows/commands/`
+- Add skill (if needed) to `workflows/skills/`
 
-**For a new skill** (domain knowledge):
-```bash
-mkdir -p skills/my-skill/{agents,references}
-mkdir skills/my-skill/.claude-plugin
-```
+**Add a new technology:**
+- Add agent to `technologies/agents/my-tech.md`
+- Add skill to `technologies/skills/my-tech/SKILL.md`
+- Add references to `technologies/skills/my-tech/references/`
 
-Then:
-1. Create agent/command files as `.md` files in the respective directories
-2. Create a `.claude-plugin/plugin.json` manifest
-3. Add the module name and path to `Makefile` (MODULES list and path mapping)
-4. Test installation: `make install my-module`
+Then run `make manifest` to update plugin.json files.
 
 ### Plugin Structure
 
+Each plugin category follows this pattern:
+
 ```
-my-plugin/
+plugin-category/
 ├── .claude-plugin/
-│   └── plugin.json      # Plugin manifest (required)
-├── README.md            # Plugin documentation
+│   └── plugin.json      # Plugin manifest (auto-updated by make manifest)
 ├── agents/
-│   └── *.md            # Agent definitions (optional)
+│   └── *.md            # Agent definitions
 ├── commands/
-│   └── *.md            # Command definitions (optional)
+│   └── *.md            # Command definitions (workflows only)
 └── skills/
-    └── skill-name/     # Skill directories (optional)
+    └── skill-name/     # Skill directories
         ├── SKILL.md    # Required: skill definition
         ├── REFERENCE.md # Optional: detailed documentation
-        └── templates/  # Optional: file templates
+        └── references/ # Optional: additional docs
 ```
-
-Plugins can have agents, commands, skills, or any combination. The root Makefile handles installation based on the module path mappings.
 
 ### Testing Changes
 

@@ -1,6 +1,6 @@
 {
-  "name": "working-tree",
-  "description": "Git worktree management with AI context tracking - create, manage, and organize worktrees with metadata",
+  "name": "workflows",
+  "description": "Operational tooling for development workflows - git worktree management with AI context tracking",
   "version": "1.0.0",
   "repository": "https://github.com/poindexter12/waypoint",
   "license": "MIT",

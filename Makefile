@@ -6,14 +6,14 @@ CLAUDE_DIR ?= $(HOME)/.claude
 MODE ?= symlink
 
 # Module definitions: name -> source path
-# Workflows: operational tooling
-# Skills: domain knowledge
-MODULES := working-tree claire terraform
+# Workflows: operational tooling (git worktree management)
+# Technologies: domain knowledge (terraform, ansible, docker, proxmox)
+MODULES := workflows technologies claire
 
 # Module source paths (where they live in this repo)
-working-tree_PATH := workflows/working-tree
+workflows_PATH := workflows
+technologies_PATH := technologies
 claire_PATH := claire
-terraform_PATH := skills/terraform
 
 # Helper to get module path
 module_path = $($(1)_PATH)
@@ -51,17 +51,17 @@ help:
 	@echo "  Run tests with:   make -f Makefile.test test"
 	@echo ""
 	@echo "$(GREEN)Available Modules:$(NC)"
-	@echo "  working-tree      Git worktree management with AI context"
-	@echo "  claire            Claude agent/command/skill optimizer with doc-fetching"
-	@echo "  terraform         Terraform workflow support for infrastructure as code"
+	@echo "  workflows         Git worktree management with AI context"
+	@echo "  technologies      Domain knowledge (Terraform, Ansible, Docker, Proxmox)"
+	@echo "  claire            Claude agent/command/skill authoring tools"
 	@echo ""
 	@echo "$(GREEN)Examples:$(NC)"
 	@echo "  make install                             Install everything to ~/.claude/"
-	@echo "  make install working-tree                Install just working-tree module"
+	@echo "  make install workflows                   Install just workflows module"
 	@echo "  make CLAUDE_DIR=./.claude install        Install to project directory"
 	@echo "  make MODE=copy install                   Copy instead of symlink"
 	@echo "  make check                               Verify all installations"
-	@echo "  make fix working-tree                    Repair working-tree module"
+	@echo "  make fix workflows                       Repair workflows module"
 	@echo ""
 	@echo "$(YELLOW)Current Configuration:$(NC)"
 	@echo "  CLAUDE_DIR = $(CLAUDE_DIR)"
@@ -324,23 +324,23 @@ manifest:
 		claire/.claude-plugin/plugin.json > claire/.claude-plugin/plugin.json.tmp && \
 	mv claire/.claude-plugin/plugin.json.tmp claire/.claude-plugin/plugin.json
 	@echo "$(GREEN)    ✓ Updated claire manifest$(NC)"
-	@# Working-tree plugin
-	@echo "$(BLUE)→ Working-tree plugin (workflows/working-tree/.claude-plugin/plugin.json)$(NC)"
-	@agents=$$(find workflows/working-tree/agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^workflows\/working-tree\//.\//g' | jq -R . | jq -s .); \
-	commands=$$(find workflows/working-tree/commands -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^workflows\/working-tree\//.\//g' | jq -R . | jq -s .); \
+	@# Workflows plugin
+	@echo "$(BLUE)→ Workflows plugin (workflows/.claude-plugin/plugin.json)$(NC)"
+	@agents=$$(find workflows/agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^workflows\//.\//g' | jq -R . | jq -s .); \
+	commands=$$(find workflows/commands -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^workflows\//.\//g' | jq -R . | jq -s .); \
 	jq --argjson agents "$$agents" --argjson commands "$$commands" \
 		'.agents = (if ($$agents | length) > 0 then $$agents else null end) | .commands = (if ($$commands | length) > 0 then $$commands else null end) | del(.agents | nulls) | del(.commands | nulls)' \
-		workflows/working-tree/.claude-plugin/plugin.json > workflows/working-tree/.claude-plugin/plugin.json.tmp && \
-	mv workflows/working-tree/.claude-plugin/plugin.json.tmp workflows/working-tree/.claude-plugin/plugin.json
-	@echo "$(GREEN)    ✓ Updated working-tree manifest$(NC)"
-	@# Terraform plugin
-	@echo "$(BLUE)→ Terraform plugin (skills/terraform/.claude-plugin/plugin.json)$(NC)"
-	@agents=$$(find skills/terraform/agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^skills\/terraform\//.\//g' | jq -R . | jq -s .); \
+		workflows/.claude-plugin/plugin.json > workflows/.claude-plugin/plugin.json.tmp && \
+	mv workflows/.claude-plugin/plugin.json.tmp workflows/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated workflows manifest$(NC)"
+	@# Technologies plugin
+	@echo "$(BLUE)→ Technologies plugin (technologies/.claude-plugin/plugin.json)$(NC)"
+	@agents=$$(find technologies/agents -maxdepth 1 -name "*.md" 2>/dev/null | sort | sed 's/^technologies\//.\//g' | jq -R . | jq -s .); \
 	jq --argjson agents "$$agents" \
 		'.agents = (if ($$agents | length) > 0 then $$agents else null end) | del(.agents | nulls)' \
-		skills/terraform/.claude-plugin/plugin.json > skills/terraform/.claude-plugin/plugin.json.tmp && \
-	mv skills/terraform/.claude-plugin/plugin.json.tmp skills/terraform/.claude-plugin/plugin.json
-	@echo "$(GREEN)    ✓ Updated terraform manifest$(NC)"
+		technologies/.claude-plugin/plugin.json > technologies/.claude-plugin/plugin.json.tmp && \
+	mv technologies/.claude-plugin/plugin.json.tmp technologies/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated technologies manifest$(NC)"
 	@echo "$(GREEN)✓ Manifests updated$(NC)"
 
 # Show unreleased changes for changelog
@@ -371,12 +371,12 @@ version:
 	@jq '.version = "$(V)"' claire/.claude-plugin/plugin.json > claire/.claude-plugin/plugin.json.tmp && \
 		mv claire/.claude-plugin/plugin.json.tmp claire/.claude-plugin/plugin.json
 	@echo "$(GREEN)    ✓ Updated claire plugin$(NC)"
-	@jq '.version = "$(V)"' workflows/working-tree/.claude-plugin/plugin.json > workflows/working-tree/.claude-plugin/plugin.json.tmp && \
-		mv workflows/working-tree/.claude-plugin/plugin.json.tmp workflows/working-tree/.claude-plugin/plugin.json
-	@echo "$(GREEN)    ✓ Updated working-tree plugin$(NC)"
-	@jq '.version = "$(V)"' skills/terraform/.claude-plugin/plugin.json > skills/terraform/.claude-plugin/plugin.json.tmp && \
-		mv skills/terraform/.claude-plugin/plugin.json.tmp skills/terraform/.claude-plugin/plugin.json
-	@echo "$(GREEN)    ✓ Updated terraform plugin$(NC)"
+	@jq '.version = "$(V)"' workflows/.claude-plugin/plugin.json > workflows/.claude-plugin/plugin.json.tmp && \
+		mv workflows/.claude-plugin/plugin.json.tmp workflows/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated workflows plugin$(NC)"
+	@jq '.version = "$(V)"' technologies/.claude-plugin/plugin.json > technologies/.claude-plugin/plugin.json.tmp && \
+		mv technologies/.claude-plugin/plugin.json.tmp technologies/.claude-plugin/plugin.json
+	@echo "$(GREEN)    ✓ Updated technologies plugin$(NC)"
 	@echo "$(GREEN)✓ Version bumped to $(V)$(NC)"
 	@echo "$(YELLOW)Don't forget to update CHANGELOG.md!$(NC)"
 
