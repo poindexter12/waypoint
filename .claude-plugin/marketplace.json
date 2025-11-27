@@ -1,0 +1,30 @@
+{
+  "name": "waypoint-marketplace",
+  "owner": {
+    "name": "Joe Seymour"
+  },
+  "metadata": {
+    "description": "Waypoint plugins for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "waypoint",
+      "description": "Technology-specific agents, commands, and skills for infrastructure and development workflows",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/terraform"
+      ]
+    },
+    {
+      "name": "claire",
+      "description": "Claude Code component authoring system - agents for creating and optimizing agents, commands, and skills",
+      "source": "./claire",
+      "strict": false,
+      "skills": [
+        "./claire/skills/doc-validator"
+      ]
+    }
+  ]
+}
