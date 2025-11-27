@@ -2,9 +2,10 @@
 name: docker
 description: |
   Docker and Docker Compose reference for container deployment, networking, volumes,
-  and orchestration. Use when working with docker-compose.yaml, Dockerfiles,
-  troubleshooting containers, or planning container architecture.
-  Triggers: docker, compose, container, dockerfile, volume, network, service.
+  and orchestration. Includes Proxmox hosting and LXC comparison patterns.
+  Use when working with docker-compose.yaml, Dockerfiles, troubleshooting containers,
+  or planning container architecture.
+  Triggers: docker, compose, container, dockerfile, volume, network, service, lxc.
 ---
 
 # Docker Skill
@@ -50,6 +51,13 @@ Load on-demand based on task:
 | Volumes | [volumes.md](references/volumes.md) | Data persistence, mounts |
 | Dockerfile | [dockerfile.md](references/dockerfile.md) | Building images |
 | Troubleshooting | [troubleshooting.md](references/troubleshooting.md) | Common errors, diagnostics |
+
+### Proxmox Integration
+
+| Topic | File | When to Load |
+|-------|------|--------------|
+| Docker on Proxmox | [proxmox/hosting.md](references/proxmox/hosting.md) | VM sizing, storage, GPU passthrough |
+| LXC vs Docker | [proxmox/lxc-vs-docker.md](references/proxmox/lxc-vs-docker.md) | Choosing container type |
 
 ## Compose File Quick Reference
 

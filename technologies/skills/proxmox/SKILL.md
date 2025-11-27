@@ -2,8 +2,9 @@
 name: proxmox
 description: |
   Proxmox VE virtualization platform reference for VM/LXC management, clustering,
-  storage, and networking. Use when working with Proxmox configurations, CLI commands,
-  troubleshooting VMs/containers, or planning resource allocation.
+  storage, and networking. Includes Terraform and Ansible integration patterns.
+  Use when working with Proxmox configurations, CLI commands, troubleshooting
+  VMs/containers, or planning resource allocation.
   Triggers: proxmox, qemu, kvm, lxc, pve, vm, container, cluster, vzdump, qm, pct.
 ---
 
@@ -50,12 +51,14 @@ Load on-demand based on task:
 | Topic | File | When to Load |
 |-------|------|--------------|
 | VM vs LXC | [vm-lxc.md](references/vm-lxc.md) | Choosing virtualization type |
+| Docker Hosting | [docker-hosting.md](references/docker-hosting.md) | Running Docker on Proxmox |
 | Networking | [networking.md](references/networking.md) | Bridges, VLANs, SDN, firewall |
 | Storage | [storage.md](references/storage.md) | Storage backends, content types |
 | Clustering | [clustering.md](references/clustering.md) | HA, quorum, fencing |
 | Backup | [backup.md](references/backup.md) | vzdump modes, restore |
 | CLI Tools | [cli-tools.md](references/cli-tools.md) | qm, pct, pvecm, pvesh commands |
 | Troubleshooting | [troubleshooting.md](references/troubleshooting.md) | Common errors, diagnostics |
+| Automation Tools | [automation-tools.md](references/automation-tools.md) | Terraform/Ansible integration |
 
 ## Validation Checklist
 

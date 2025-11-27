@@ -2,8 +2,9 @@
 name: ansible
 description: |
   Ansible automation reference for playbooks, roles, inventory, variables, and modules.
+  Includes Proxmox VE and Docker integration via community.general and community.docker collections.
   Use when writing playbooks, troubleshooting Ansible runs, or designing automation workflows.
-  Triggers: ansible, playbook, inventory, role, task, handler, vars, jinja2, galaxy.
+  Triggers: ansible, playbook, inventory, role, task, handler, vars, jinja2, galaxy, proxmox_kvm, proxmox_lxc, docker_container, docker_compose.
 ---
 
 # Ansible Skill
@@ -53,6 +54,23 @@ Load on-demand based on task:
 | Variables | [variables.md](references/variables.md) | Variable precedence, facts |
 | Modules | [modules.md](references/modules.md) | Common module reference |
 | Troubleshooting | [troubleshooting.md](references/troubleshooting.md) | Common errors, debugging |
+
+### Proxmox Integration
+
+| Topic | File | When to Load |
+|-------|------|--------------|
+| Proxmox Modules | [proxmox/modules.md](references/proxmox/modules.md) | VM/LXC management via API |
+| Proxmox Auth | [proxmox/authentication.md](references/proxmox/authentication.md) | API tokens, credentials |
+| Proxmox Gotchas | [proxmox/gotchas.md](references/proxmox/gotchas.md) | Common issues, workarounds |
+| Dynamic Inventory | [proxmox/dynamic-inventory.md](references/proxmox/dynamic-inventory.md) | Auto-discover VMs/containers |
+
+### Docker Integration
+
+| Topic | File | When to Load |
+|-------|------|--------------|
+| Docker Deployment | [docker/deployment.md](references/docker/deployment.md) | Containers, images, networks, volumes |
+| Compose Patterns | [docker/compose-patterns.md](references/docker/compose-patterns.md) | Roles, templates, multi-service stacks |
+| Docker Troubleshooting | [docker/troubleshooting.md](references/docker/troubleshooting.md) | Common errors, debugging |
 
 ## Playbook Quick Reference
 
