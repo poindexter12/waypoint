@@ -1,0 +1,5 @@
+{
+  "name": "waypoint",
+  "description": "Technology-specific agents, commands, and skills for infrastructure and development workflows",
+  "version": "1.0.0"
+}

@@ -4,7 +4,7 @@
 # Configuration
 CLAUDE_DIR ?= $(HOME)/.claude
 MODE ?= symlink
-MODULES := working-tree claire
+MODULES := working-tree claire terraform
 
 # Colors for output
 BLUE := \033[0;34m
@@ -38,6 +38,7 @@ help:
 	@echo "$(GREEN)Available Modules:$(NC)"
 	@echo "  working-tree      Git worktree management with AI context"
 	@echo "  claire            Claude agent/command/skill optimizer with doc-fetching"
+	@echo "  terraform         Terraform workflow support for infrastructure as code"
 	@echo ""
 	@echo "$(GREEN)Examples:$(NC)"
 	@echo "  make install                             Install everything to ~/.claude/"
