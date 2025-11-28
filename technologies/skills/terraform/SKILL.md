@@ -49,13 +49,14 @@ Load on-demand based on task:
 
 | Topic | File | When to Load |
 |-------|------|--------------|
-| Proxmox Gotchas | [proxmox/gotchas.md](references/proxmox/gotchas.md) | Critical provider issues, workarounds |
-| Proxmox Auth | [proxmox/authentication.md](references/proxmox/authentication.md) | Provider config, API tokens |
-| Proxmox VMs | [proxmox/vm-qemu.md](references/proxmox/vm-qemu.md) | proxmox_vm_qemu resource patterns |
-| Proxmox Errors | [proxmox/troubleshooting.md](references/proxmox/troubleshooting.md) | Common errors, debugging |
+| Troubleshooting | [troubleshooting.md](references/troubleshooting.md) | Common errors, debugging |
 | State | [state-management.md](references/state-management.md) | Backends, locking, operations |
 | Modules | [module-design.md](references/module-design.md) | Module patterns, composition |
 | Security | [security.md](references/security.md) | Secrets, state security |
+| Proxmox Gotchas | [proxmox/gotchas.md](references/proxmox/gotchas.md) | Critical provider issues, workarounds |
+| Proxmox Auth | [proxmox/authentication.md](references/proxmox/authentication.md) | Provider config, API tokens |
+| Proxmox VMs | [proxmox/vm-qemu.md](references/proxmox/vm-qemu.md) | proxmox_vm_qemu resource patterns |
+| Proxmox Errors | [proxmox/troubleshooting.md](references/proxmox/troubleshooting.md) | Proxmox-specific errors |
 | External | [external-resources.md](references/external-resources.md) | Official docs, links |
 
 ## Validation Checklist

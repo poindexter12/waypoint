@@ -148,3 +148,56 @@ keep-daily: 7
 keep-weekly: 4
 keep-monthly: 6
 ```
+
+## Troubleshooting
+
+### Disk Usage
+
+```bash
+df -h                           # Filesystem usage
+du -sh /* 2>/dev/null | sort -h # Directory sizes
+lsblk                           # Block device listing
+```
+
+### I/O Performance
+
+```bash
+iostat -x 1 5                   # Disk I/O stats
+iotop                           # Real-time I/O by process
+```
+
+### Ceph Diagnostics
+
+```bash
+ceph status                     # Overall status
+ceph health detail              # Health issues
+ceph osd tree                   # OSD topology
+ceph df                         # Space usage
+ceph osd pool ls detail         # Pool details
+```
+
+### NFS Diagnostics
+
+```bash
+showmount -e <server>           # List NFS exports
+mount | grep nfs                # Mounted NFS shares
+nfsstat -c                      # Client statistics
+```
+
+### iSCSI Diagnostics
+
+```bash
+iscsiadm -m discovery -t st -p <target-ip>  # Discover targets
+iscsiadm -m session                          # Active sessions
+iscsiadm -m node -T <target> -p <ip> --login # Login to target
+```
+
+### Common Storage Errors
+
+| Error | Likely Cause | Fix |
+|-------|--------------|-----|
+| Ceph degraded | OSD down, network | Check `ceph status`, OSD logs |
+| NFS mount failed | Export, network | Verify exports, check network |
+| Slow performance | Network, IOPS | Check jumbo frames, disk IOPS |
+| Out of space | Capacity | `ceph df`, identify growth |
+| Storage unavailable | Mount failed | Check mount, network access |

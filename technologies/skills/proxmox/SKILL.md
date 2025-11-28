@@ -54,6 +54,7 @@ Load on-demand based on task:
 | Docker Hosting | [docker-hosting.md](references/docker-hosting.md) | Running Docker on Proxmox |
 | Networking | [networking.md](references/networking.md) | Bridges, VLANs, SDN, firewall |
 | Storage | [storage.md](references/storage.md) | Storage backends, content types |
+| Cloud-init | [cloud-init-templates.md](references/cloud-init-templates.md) | VM provisioning with cloud-init |
 | Clustering | [clustering.md](references/clustering.md) | HA, quorum, fencing |
 | Backup | [backup.md](references/backup.md) | vzdump modes, restore |
 | CLI Tools | [cli-tools.md](references/cli-tools.md) | qm, pct, pvecm, pvesh commands |

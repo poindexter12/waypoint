@@ -1,5 +1,57 @@
 # Proxmox Troubleshooting Reference
 
+## Quick Lookup Table
+
+| Problem | First Commands |
+|---------|----------------|
+| Service down | `systemctl status <svc>`, `journalctl -u <svc>` |
+| Network unreachable | `ping`, `ip route`, `ss -tlnp` |
+| Disk full | `df -h`, `du -sh /*`, `lsof +D /path` |
+| High CPU | `top`, `ps aux --sort=-%cpu` |
+| High memory | `free -h`, `ps aux --sort=-%mem` |
+| VM issue | `qm status <id>`, `qm showcmd <id>` |
+| Container issue | `pct status <id>`, `pct enter <id>` |
+
+## System Diagnostics
+
+### Resource Usage
+
+```bash
+# CPU and processes
+top -bn1 | head -20
+ps aux --sort=-%cpu | head -10
+uptime
+mpstat 1 5
+
+# Memory
+free -h
+ps aux --sort=-%mem | head -10
+cat /proc/meminfo
+
+# Disk
+df -h
+du -sh /* 2>/dev/null | sort -h
+lsblk
+iostat -x 1 5
+
+# Network
+ss -tlnp           # listening ports
+ss -s              # socket statistics
+iftop              # real-time bandwidth
+ip -s link         # interface statistics
+```
+
+### Log Locations
+
+| Service | Log Location |
+|---------|--------------|
+| System | `/var/log/syslog`, `journalctl` |
+| Auth | `/var/log/auth.log` |
+| Kernel | `dmesg`, `/var/log/kern.log` |
+| Proxmox | `/var/log/pve/`, `journalctl -u pve*` |
+| Ceph | `/var/log/ceph/` |
+| Cloud-init | `/var/log/cloud-init.log`, `/var/log/cloud-init-output.log` |
+
 ## Common Errors
 
 | Error | Cause | Solution |
@@ -195,3 +247,16 @@ qm list | grep running
 echo -e "\n=== Running Containers ==="
 pct list | grep running
 ```
+
+## Systematic Debugging Approach
+
+1. **Identify** - What service/component is affected?
+2. **Check status** - Is it running? What state?
+3. **Read logs** - What errors are reported?
+4. **Verify config** - Has anything changed?
+5. **Test connectivity** - Can it reach dependencies?
+6. **Check resources** - CPU/memory/disk/network?
+7. **Compare** - Does a known-good config work?
+8. **Isolate** - Narrow down to root cause
+9. **Fix and verify** - Apply fix, confirm resolution
+10. **Document** - Record what happened and how it was fixed

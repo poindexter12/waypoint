@@ -151,3 +151,63 @@ ip addr                        # From inside VM
 | Wrong VLAN | Tag matches switch config |
 | Slow network | MTU mismatch, driver type |
 | Firewall blocking | Rules, policy, enabled status |
+
+### Connectivity Diagnostics
+
+```bash
+# Basic connectivity
+ping -c 3 <host>
+traceroute <host>
+mtr <host>
+
+# DNS
+dig <hostname>
+nslookup <hostname>
+host <hostname>
+
+# Ports and connections
+ss -tlnp                    # Listening TCP ports
+ss -tunp                    # All connections
+nc -zv <host> <port>        # Test port
+telnet <host> <port>        # Interactive port test
+```
+
+### Routing Diagnostics
+
+```bash
+ip route                    # Full routing table
+ip route get <ip>           # Route to specific IP
+route -n                    # Numeric routing table
+```
+
+### Interface Diagnostics
+
+```bash
+ip addr                     # All interface IPs
+ip link show                # Interface status
+ethtool <interface>         # Interface details/stats
+ip -s link                  # Interface statistics
+```
+
+### VLAN Verification
+
+```bash
+cat /proc/net/vlan/*        # VLAN interfaces
+bridge vlan show            # Bridge VLAN config
+```
+
+### MTU Check (jumbo frames)
+
+```bash
+# Test path MTU (9000 byte frames need 8972 payload)
+ping -c 3 -M do -s 8972 <storage-host>
+```
+
+### Common Network Errors
+
+| Error | Likely Cause | Fix |
+|-------|--------------|-----|
+| No route to host | Routing table | Check `ip route`, verify gateway |
+| Connection refused | Service not running | Check service, verify port |
+| VLAN not working | Tagging issue | Check switch config, VLAN tags |
+| MTU mismatch | Jumbo frames | Verify MTU on all devices in path |

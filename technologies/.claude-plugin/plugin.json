@@ -21,6 +21,7 @@
     "./skills/terraform",
     "./skills/ansible",
     "./skills/docker",
-    "./skills/proxmox"
+    "./skills/proxmox",
+    "./skills/github-actions"
   ]
 }
