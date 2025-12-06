@@ -1,6 +1,6 @@
 {
   "name": "workflows",
-  "description": "Operational tooling for development workflows - git worktree management with AI context tracking",
+  "description": "Operational tooling for development workflows - git worktree management, GitHub issues backlog",
   "version": "1.0.0",
   "repository": "https://github.com/poindexter12/waypoint",
   "license": "MIT",
@@ -8,10 +8,13 @@
     "git",
     "worktree",
     "workflow",
-    "branching"
+    "branching",
+    "github",
+    "issues"
   ],
   "agents": [
-    "./agents/consultant.md"
+    "./agents/consultant.md",
+    "./agents/gh-wrangler.md"
   ],
   "commands": [
     "./commands/adopt.md",
@@ -21,6 +24,9 @@
     "./commands/status.md"
   ],
   "skills": [
-    "./skills/working-tree"
+    "./skills/working-tree",
+    "./skills/gh-issue-templates",
+    "./skills/gh-issue-triage",
+    "./skills/gh-issue-lifecycle"
   ]
 }
