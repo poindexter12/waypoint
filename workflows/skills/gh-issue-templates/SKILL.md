@@ -1,6 +1,6 @@
 ---
 name: gh-issue-templates
-description: Formats for different GitHub issue types (bug, feature, task). Use when creating issues to ensure consistent structure and required information.
+description: Standardized GitHub issue templates for bugs, features, and tasks. Provides title formats, body structure, and required sections. Use when creating issues to ensure consistency. Includes copy-paste templates in templates/ directory.
 ---
 
 # Issue Templates
@@ -135,6 +135,19 @@ See `templates/` for copy-paste ready files:
 - `bug.md` - Bug report template
 - `feature.md` - Feature request template
 - `task.md` - Task/chore template
+
+## Integration with Other Components
+
+### After Creating Issue
+After using this skill to create an issue, use:
+- **gh-issue-triage** skill to apply appropriate labels and priority
+- **gh-wrangler** agent to create the issue via gh CLI
+
+### Workflow
+1. Use **gh-issue-templates** (this skill) to format the issue
+2. Use **gh-issue-triage** to determine labels and priority
+3. Use **gh-wrangler** to create the issue with `gh issue create`
+4. Use **gh-issue-lifecycle** to manage state transitions
 
 ## Related
 

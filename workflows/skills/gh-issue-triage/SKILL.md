@@ -1,6 +1,6 @@
 ---
 name: gh-issue-triage
-description: Rules for labeling and prioritizing GitHub issues. Use when triaging incoming issues to ensure consistent categorization and priority assignment.
+description: Label taxonomy and triage workflow for GitHub issues. Defines type labels (bug/feature/enhancement/docs/chore), priority levels (critical/high/medium/low), status labels, and triage decision workflow. Use when categorizing and prioritizing issues.
 ---
 
 # Issue Triage
@@ -183,6 +183,27 @@ Action:
 
 See `references/` for:
 - `label-taxonomy.md` - Complete label reference with colors
+
+## Integration with Other Components
+
+### Typical Triage Workflow
+1. Issue created using **gh-issue-templates** (gets `needs-triage` label)
+2. Use **gh-issue-triage** (this skill) to determine type and priority
+3. Apply labels using **gh-wrangler** agent
+4. Track state changes using **gh-issue-lifecycle**
+
+### Label Setup
+Use `references/label-taxonomy.md` to:
+- Create labels with correct colors: `gh label create "bug" --color "d73a4a"`
+- Maintain consistent taxonomy across repositories
+- Setup new repositories with standard labels
+
+### Priority Assignment
+Consult "Priority Guidelines" section in this skill:
+- **Critical**: Production down, security, data loss
+- **High**: Major features broken, significant impact
+- **Medium**: Normal bugs and features (most issues)
+- **Low**: Nice-to-have, cosmetic, edge cases
 
 ## Related
 

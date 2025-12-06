@@ -1,6 +1,6 @@
 ---
 name: gh-issue-lifecycle
-description: How issues move through states and connect to code. Use when managing issue state transitions, linking to branches/PRs, and handling stale issues.
+description: GitHub issue state machine and code integration patterns. Covers state transitions (needs-triage → accepted → in-progress → completed), branch naming (feat/123-desc), PR linking (Closes #123), close reasons (duplicate/won't fix/invalid/stale), and bulk operations.
 ---
 
 # Issue Lifecycle
@@ -237,6 +237,34 @@ gh issue edit 123 \
   --remove-label "in-progress" \
   --add-label "blocked"
 gh issue comment 123 --body "Blocked on #456"
+```
+
+## Integration with Other Components
+
+### Full Issue Workflow
+1. **Create**: Use **gh-issue-templates** to format issue
+2. **Triage**: Use **gh-issue-triage** to add type/priority labels
+3. **Start Work**: Use this skill's branch naming patterns (feat/123-desc)
+4. **Link to Code**: Reference issue in PR using `Closes #123`
+5. **Close**: Use **gh-wrangler** agent with this skill's close patterns
+6. **Cleanup**: PR merge auto-closes issue via GitHub
+
+### State Transitions
+This skill defines how issues move through states:
+- `needs-triage` → Initial state (set by **gh-issue-templates**)
+- `accepted` → After triage (applied by **gh-wrangler** using **gh-issue-triage**)
+- `in-progress` → Work started (manual or via branch creation)
+- `blocked` → Can't proceed (set manually with comment)
+- Closed → Via PR merge or manual close
+
+### Branch and PR Integration
+When starting work on an issue:
+```bash
+# Branch naming from this skill
+git checkout -b feat/123-description
+
+# PR creation with linking
+gh pr create --title "feat: description (#123)" --body "Closes #123"
 ```
 
 ## Related
