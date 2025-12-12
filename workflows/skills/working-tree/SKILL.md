@@ -156,6 +156,7 @@ Isolated i18n work for specific locale.
 **DON'T:**
 - Create worktree for same branch twice
 - Use generic names: `test`, `temp`, `new`
+- Use branch names that match existing project folders (e.g., `workflows`, `src`, `backend`)
 - Forget to clean up: `/working-tree:destroy` when done
 - Ignore uncommitted changes before destroying
 

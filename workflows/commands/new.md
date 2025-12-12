@@ -9,6 +9,8 @@ model: sonnet
 
 Create new branch (if needed), attach git worktree, generate AI metadata files for isolated development.
 
+**Important:** The command validates that the worktree name will not conflict with existing top-level directories in your project. If a conflict is detected, creation will be blocked and alternative naming patterns will be suggested.
+
 ## ARGUMENT SPECIFICATION
 
 ```
@@ -232,7 +234,36 @@ NEXT:
 - On success → STEP 7
 - No validation needed (pure transformation)
 
-### STEP 7: CHECK FOR EXISTING WORKTREE ON BRANCH
+### STEP 7: CHECK FOR TOP-LEVEL DIRECTORY NAME CONFLICTS
+
+EXECUTE:
+```bash
+# Get list of top-level directories in the repository
+TOP_LEVEL_DIRS=$(cd "$REPO_ROOT" && ls -d */ 2>/dev/null | sed 's|/||g')
+
+# Check if the normalized branch name matches any top-level directory
+CONFLICT_DIR=""
+for dir in $TOP_LEVEL_DIRS; do
+    if [ "$NORMALIZED_BRANCH" = "$dir" ]; then
+        CONFLICT_DIR="$dir"
+        break
+    fi
+done
+```
+
+VALIDATION:
+- IF CONFLICT_DIR not empty → ERROR PATTERN "worktree-name-conflicts-with-directory"
+
+CONTEXT:
+- This prevents creating worktrees with names that match existing project folders
+- Such conflicts can cause confusion during git operations and rebases
+- Example: branch "workflows" would create "myapp-workflows" which conflicts with "workflows/" directory
+
+NEXT:
+- On CONFLICT_DIR empty → STEP 8
+- On CONFLICT_DIR not empty → ABORT
+
+### STEP 8: CHECK FOR EXISTING WORKTREE ON BRANCH
 
 EXECUTE:
 ```bash
@@ -243,10 +274,10 @@ VALIDATION:
 - IF EXISTING_WORKTREE not empty → ERROR PATTERN "branch-has-worktree" with path=$EXISTING_WORKTREE
 
 NEXT:
-- On EXISTING_WORKTREE empty → STEP 8
+- On EXISTING_WORKTREE empty → STEP 9
 - On EXISTING_WORKTREE not empty → ABORT
 
-### STEP 8: CHECK TARGET DIRECTORY DOESN'T EXIST
+### STEP 9: CHECK TARGET DIRECTORY DOESN'T EXIST
 
 EXECUTE:
 ```bash
@@ -258,10 +289,10 @@ VALIDATION:
 - IF DIR_EXISTS == 0 (directory exists) → ERROR PATTERN "directory-exists"
 
 NEXT:
-- On DIR_EXISTS != 0 (does not exist) → STEP 9
+- On DIR_EXISTS != 0 (does not exist) → STEP 10
 - On DIR_EXISTS == 0 (exists) → ABORT
 
-### STEP 9: CREATE WORKTREE
+### STEP 10: CREATE WORKTREE
 
 EXECUTE:
 ```bash
@@ -273,10 +304,10 @@ VALIDATION:
 - IF EXIT_CODE != 0 → ERROR PATTERN "worktree-creation-failed"
 
 NEXT:
-- On success → STEP 10
+- On success → STEP 11
 - On failure → ABORT
 
-### STEP 10: GENERATE TIMESTAMP
+### STEP 11: GENERATE TIMESTAMP
 
 EXECUTE:
 ```bash
@@ -289,10 +320,10 @@ VALIDATION:
 - CREATED_TIMESTAMP must match pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$
 
 NEXT:
-- On success → STEP 11
+- On success → STEP 12
 - No failure case
 
-### STEP 11: GENERATE .ai-context.json
+### STEP 12: GENERATE .ai-context.json
 
 CONTENT TEMPLATE:
 ```json
@@ -332,10 +363,10 @@ VALIDATION:
 - IF jq fails → ERROR PATTERN "metadata-write-failed"
 
 NEXT:
-- On success → STEP 12
+- On success → STEP 13
 - On failure → ABORT (and cleanup worktree)
 
-### STEP 12: GENERATE README.working-tree.md
+### STEP 13: GENERATE README.working-tree.md
 
 CONTENT TEMPLATE:
 ```markdown
@@ -416,10 +447,10 @@ VALIDATION:
 - IF file creation failed → ERROR PATTERN "readme-write-failed"
 
 NEXT:
-- On success → STEP 13
+- On success → STEP 14
 - On failure → ABORT (and cleanup)
 
-### STEP 13: OUTPUT SUCCESS SUMMARY
+### STEP 14: OUTPUT SUCCESS SUMMARY
 
 OUTPUT FORMAT (exact):
 ```
@@ -595,10 +626,45 @@ CONTROL FLOW:
 - CLEANUP: none
 - RETRY: false
 
+### PATTERN: worktree-name-conflicts-with-directory
+
+DETECTION:
+- TRIGGER: NORMALIZED_BRANCH matches an existing top-level directory name (STEP 7)
+- CAPTURE: CONFLICT_DIR = the conflicting directory name
+
+RESPONSE (exact):
+```
+Error: Worktree name conflicts with existing project directory '{CONFLICT_DIR}/'
+
+The proposed worktree name '{WORKTREE_NAME}' would conflict with the existing
+'{CONFLICT_DIR}/' directory in your project.
+
+This can cause confusion during git operations and rebases.
+
+Suggested alternatives:
+  - Use a prefix: /working-tree:new feat/{BRANCH_NAME}
+  - Use a suffix: /working-tree:new {BRANCH_NAME}-update
+  - Be more specific: /working-tree:new feature/{BRANCH_NAME}-refactor
+
+Current branch name: {BRANCH_NAME}
+Proposed worktree: {WORKTREE_NAME}
+Conflicting directory: {CONFLICT_DIR}/
+```
+
+TEMPLATE SUBSTITUTIONS:
+- {CONFLICT_DIR} = the directory name that conflicts
+- {WORKTREE_NAME} = the full proposed worktree name
+- {BRANCH_NAME} = the branch name provided by user
+
+CONTROL FLOW:
+- ABORT: true
+- CLEANUP: none (nothing created yet)
+- RETRY: false (user must choose different name)
+
 ### PATTERN: branch-has-worktree
 
 DETECTION:
-- TRIGGER: git worktree list shows branch already has attached worktree (STEP 7)
+- TRIGGER: git worktree list shows branch already has attached worktree (STEP 8)
 - CAPTURE: EXISTING_WORKTREE path
 
 RESPONSE (exact):
@@ -623,7 +689,7 @@ CONTROL FLOW:
 ### PATTERN: directory-exists
 
 DETECTION:
-- TRIGGER: Target directory already exists (STEP 8)
+- TRIGGER: Target directory already exists (STEP 9)
 - CHECK: test -e "$WORKTREE_PATH" returns 0
 
 RESPONSE (exact):
@@ -649,7 +715,7 @@ CONTROL FLOW:
 ### PATTERN: worktree-creation-failed
 
 DETECTION:
-- TRIGGER: git worktree add fails (STEP 9)
+- TRIGGER: git worktree add fails (STEP 10)
 - CAPTURE: stderr from git worktree add
 
 RESPONSE (exact):
@@ -675,7 +741,7 @@ CONTROL FLOW:
 ### PATTERN: metadata-write-failed
 
 DETECTION:
-- TRIGGER: .ai-context.json write fails or invalid JSON (STEP 11)
+- TRIGGER: .ai-context.json write fails or invalid JSON (STEP 12)
 - CHECK: jq validation fails
 
 RESPONSE (exact):
@@ -703,7 +769,7 @@ CONTROL FLOW:
 ### PATTERN: readme-write-failed
 
 DETECTION:
-- TRIGGER: README.working-tree.md write fails (STEP 12)
+- TRIGGER: README.working-tree.md write fails (STEP 13)
 
 RESPONSE (exact):
 ```
@@ -773,13 +839,14 @@ EXPECTED EXECUTION FLOW:
 4. STEP 4 → BRANCH_EXISTS=1 (does not exist)
 5. STEP 5 → Create branch "feature/login-refactor"
 6. STEP 6 → WORKTREE_NAME="myapp-feature-login-refactor", WORKTREE_PATH="/Users/dev/myapp-feature-login-refactor"
-7. STEP 7 → No existing worktree
-8. STEP 8 → Directory does not exist
-9. STEP 9 → Create worktree
-10. STEP 10 → Generate timestamp
-11. STEP 11 → Write .ai-context.json
-12. STEP 12 → Write README.working-tree.md
-13. STEP 13 → Output summary
+7. STEP 7 → No directory conflict
+8. STEP 8 → No existing worktree
+9. STEP 9 → Directory does not exist
+10. STEP 10 → Create worktree
+11. STEP 11 → Generate timestamp
+12. STEP 12 → Write .ai-context.json
+13. STEP 13 → Write README.working-tree.md
+14. STEP 14 → Output summary
 
 EXPECTED OUTPUT:
 ```
@@ -847,7 +914,63 @@ jq -r '.mode' .ai-context.json | grep "experiment" && echo "PASS" || echo "FAIL"
 jq -r '.description' .ai-context.json | grep "Testing new architecture" && echo "PASS" || echo "FAIL"
 ```
 
-### TC003: Branch already has worktree
+### TC003: Worktree name conflicts with existing directory
+
+PRECONDITIONS:
+- In git repository at /Users/dev/myapp
+- Project has top-level directories: workflows/, technologies/, claire/
+- Branch "workflows" does not exist
+
+INPUT:
+```
+/working-tree:new workflows
+```
+
+EXPECTED EXECUTION FLOW:
+1. STEP 1 → REPO_ROOT="/Users/dev/myapp", REPO_NAME="myapp", PARENT_DIR="/Users/dev"
+2. STEP 2 → BRANCH_NAME="workflows", MODE_ARG="", DESCRIPTION=""
+3. STEP 3 → MODE="feature" (default)
+4. STEP 4 → BRANCH_EXISTS=1 (does not exist)
+5. STEP 5 → Create branch "workflows"
+6. STEP 6 → NORMALIZED_BRANCH="workflows", WORKTREE_NAME="myapp-workflows"
+7. STEP 7 → CONFLICT_DIR="workflows" (matches top-level directory)
+8. ERROR PATTERN "worktree-name-conflicts-with-directory"
+9. ABORT
+
+EXPECTED OUTPUT:
+```
+Error: Worktree name conflicts with existing project directory 'workflows/'
+
+The proposed worktree name 'myapp-workflows' would conflict with the existing
+'workflows/' directory in your project.
+
+This can cause confusion during git operations and rebases.
+
+Suggested alternatives:
+  - Use a prefix: /working-tree:new feat/workflows
+  - Use a suffix: /working-tree:new workflows-update
+  - Be more specific: /working-tree:new feature/workflows-refactor
+
+Current branch name: workflows
+Proposed worktree: myapp-workflows
+Conflicting directory: workflows/
+```
+
+POSTCONDITIONS:
+- Branch "workflows" was created
+- No worktree created
+- Project directories unchanged
+
+VALIDATION COMMANDS:
+```bash
+# Verify branch was created
+git show-ref --verify refs/heads/workflows && echo "PASS" || echo "FAIL"
+
+# Verify no worktree created
+test ! -d /Users/dev/myapp-workflows && echo "PASS" || echo "FAIL"
+```
+
+### TC004: Branch already has worktree
 
 PRECONDITIONS:
 - Branch "feature/existing" already has worktree at /Users/dev/myapp-feature-existing
@@ -859,9 +982,10 @@ INPUT:
 
 EXPECTED EXECUTION FLOW:
 1-6. Standard detection and parsing
-7. STEP 7 → EXISTING_WORKTREE="/Users/dev/myapp-feature-existing"
-8. ERROR PATTERN "branch-has-worktree"
-9. ABORT
+7. STEP 7 → No directory conflict
+8. STEP 8 → EXISTING_WORKTREE="/Users/dev/myapp-feature-existing"
+9. ERROR PATTERN "branch-has-worktree"
+10. ABORT
 
 EXPECTED OUTPUT:
 ```
@@ -878,7 +1002,7 @@ POSTCONDITIONS:
 - No new branch created
 - Existing worktree unchanged
 
-### TC004: Invalid mode specified
+### TC005: Invalid mode specified
 
 PRECONDITIONS:
 - In git repository
@@ -905,7 +1029,7 @@ Example:
   /working-tree:new my-branch --mode feature
 ```
 
-### TC005: Directory already exists
+### TC006: Directory already exists
 
 PRECONDITIONS:
 - Directory /Users/dev/myapp-feature-test already exists (not a worktree)
@@ -916,10 +1040,10 @@ INPUT:
 ```
 
 EXPECTED EXECUTION FLOW:
-1-7. Standard flow
-8. STEP 8 → DIR_EXISTS=0 (directory exists)
-9. ERROR PATTERN "directory-exists"
-10. ABORT
+1-8. Standard flow
+9. STEP 9 → DIR_EXISTS=0 (directory exists)
+10. ERROR PATTERN "directory-exists"
+11. ABORT
 
 EXPECTED OUTPUT:
 ```
