@@ -132,6 +132,13 @@ Prototype freely, discard if needed.
 ```
 Review without disrupting current work.
 
+### Pattern 5: Internationalization
+```bash
+/working-tree:new i18n/zh-CN --description "Chinese Simplified translations"
+/working-tree:new i18n/42-ja-JP --description "Japanese translations for issue #42"
+```
+Isolated i18n work for specific locale.
+
 ## Supporting Files
 
 - **REFERENCE.md**: Comprehensive guide with detailed best practices, naming conventions, workflows, and advanced patterns

@@ -64,7 +64,7 @@ branch:
   - Full git branch name
   - Must match actual git branch
   - Example: "feature/user-authentication"
-  - Common prefixes: feature/, bugfix/, exp/, review/
+  - Common prefixes: feature/, bugfix/, exp/, review/, i18n/
 
 mode:
   - Must be one of: main, feature, bugfix, experiment, review

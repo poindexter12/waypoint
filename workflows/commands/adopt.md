@@ -40,6 +40,8 @@ def infer_mode(branch_name: str) -> str:
         return "experiment"
     elif branch_name.startswith("review/"):
         return "review"
+    elif branch_name.startswith("i18n/"):
+        return "feature"  # i18n work is feature-type work
     elif branch_name in ("main", "master"):
         return "main"
     else:
@@ -176,6 +178,9 @@ else
             ;;
         review/*)
             MODE="review"
+            ;;
+        i18n/*)
+            MODE="feature"  # i18n work is feature-type work
             ;;
         main|master)
             MODE="main"

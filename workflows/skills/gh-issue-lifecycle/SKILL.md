@@ -70,12 +70,16 @@ feat/123-short-description    # feature
 fix/123-short-description     # bug fix
 chore/123-short-description   # maintenance
 docs/123-short-description    # documentation
+i18n/locale-code              # internationalization (e.g., i18n/zh-CN, i18n/ja-JP)
+i18n/123-locale-code          # i18n with issue (e.g., i18n/42-es-MX)
 ```
 
 Examples:
 - `feat/42-add-dark-mode`
 - `fix/123-login-timeout`
 - `chore/99-update-deps`
+- `i18n/zh-CN` - Chinese (Simplified) translations
+- `i18n/42-ja-JP` - Japanese translations for issue #42
 
 ### PR Title
 

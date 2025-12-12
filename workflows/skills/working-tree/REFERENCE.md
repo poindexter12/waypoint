@@ -333,7 +333,7 @@ Use branch prefixes to auto-infer modes:
 - Use lowercase with hyphens: `user-auth` ✅
 - Be descriptive: `feature/oauth2-integration` ✅
 - Include issue numbers: `bugfix/issue-427-timeout` ✅
-- Use consistent prefixes: `feature/`, `bugfix/`, `exp/` ✅
+- Use consistent prefixes: `feature/`, `bugfix/`, `exp/`, `i18n/` ✅
 
 **DON'T:**
 - Use generic names: `test`, `temp`, `new` ❌
