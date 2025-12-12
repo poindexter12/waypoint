@@ -138,17 +138,38 @@ PLUGINS_DIR="$HOME/.claude/plugins"
 
 # For marketplace plugins
 for plugin_dir in "$PLUGINS_DIR/marketplaces"/*; do
-    if [ -d "$plugin_dir/.git" ]; then
-        cd "$plugin_dir"
-        PLUGIN_NAME=$(basename "$plugin_dir")
-        LOCAL_HEAD=$(git rev-parse HEAD)
-        git fetch origin --quiet
-        REMOTE_HEAD=$(git rev-parse origin/main 2>/dev/null || git rev-parse origin/master 2>/dev/null)
-        if [ "$LOCAL_HEAD" != "$REMOTE_HEAD" ]; then
-            echo "UPDATE_AVAILABLE: $PLUGIN_NAME"
-        else
-            echo "UP_TO_DATE: $PLUGIN_NAME"
-        fi
+    if [ ! -d "$plugin_dir" ]; then
+        continue
+    fi
+
+    PLUGIN_NAME=$(basename "$plugin_dir")
+
+    # Check if it's a git repository
+    if [ ! -d "$plugin_dir/.git" ]; then
+        echo "SKIP: $PLUGIN_NAME (not a git repository)"
+        continue
+    fi
+
+    cd "$plugin_dir"
+    LOCAL_HEAD=$(git rev-parse HEAD 2>/dev/null)
+
+    # Fetch with error handling
+    if ! git fetch origin --quiet 2>/dev/null; then
+        echo "ERROR: $PLUGIN_NAME (fetch failed - check network/auth)"
+        continue
+    fi
+
+    REMOTE_HEAD=$(git rev-parse origin/main 2>/dev/null || git rev-parse origin/master 2>/dev/null)
+
+    if [ -z "$REMOTE_HEAD" ]; then
+        echo "ERROR: $PLUGIN_NAME (no main/master branch found)"
+        continue
+    fi
+
+    if [ "$LOCAL_HEAD" != "$REMOTE_HEAD" ]; then
+        echo "UPDATE_AVAILABLE: $PLUGIN_NAME ($LOCAL_HEAD -> $REMOTE_HEAD)"
+    else
+        echo "UP_TO_DATE: $PLUGIN_NAME"
     fi
 done
 ```
@@ -620,6 +641,39 @@ CONTROL FLOW:
 - CLEANUP: None
 - RETRY: After user fixes permissions
 
+### PATTERN: git-operation-failed
+
+DETECTION:
+- TRIGGER: git fetch, pull, or clone fails
+- CHECK: Exit code != 0 from git command
+
+RESPONSE:
+```
+Error: Git operation failed
+
+Command: {git-command}
+Error: {stderr}
+
+Common causes:
+1. Network connectivity issues
+2. Authentication required (private repo)
+3. Repository doesn't exist
+4. Merge conflicts (for pull)
+5. Detached HEAD or uncommitted changes
+
+Solutions:
+1. Check network connection
+2. Verify repository URL is correct
+3. For private repos: ensure SSH key or token configured
+4. For pull failures: check for local changes (git status)
+5. Try manual operation: {suggested-command}
+```
+
+CONTROL FLOW:
+- ABORT: true (cannot proceed)
+- CLEANUP: None
+- RETRY: After user fixes issue
+
 ## TOOL PERMISSION MATRIX
 
 | Tool | Pattern | Permission | Pre-Check | Post-Check | On-Deny-Action |
@@ -880,11 +934,12 @@ Use before completing operations:
 
 ### Behavioral Validation
 - [ ] Clear operation type determination
-- [ ] Read-only constraints enforced
-- [ ] Safety checks before guidance
+- [ ] Confirmation required before destructive operations
+- [ ] Shows what will be changed before executing
+- [ ] Validates inputs before operations
 - [ ] Anti-patterns documented
 - [ ] Tool access justified and minimal
-- [ ] No destructive operations
+- [ ] Backup guidance provided for destructive ops
 
 ### Quality Validation
 - [ ] Examples show full context
