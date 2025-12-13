@@ -21,6 +21,7 @@
     "./commands/fetch-docs.md"
   ],
   "skills": [
-    "./skills/doc-validator"
+    "./skills/doc-validator",
+    "./skills/plugin-validator"
   ]
 }
