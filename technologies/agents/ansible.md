@@ -5,13 +5,24 @@ description: Ansible automation expertise for configuration management and appli
 category: infrastructure
 tags: [ansible,automation,playbook,inventory,configuration,deployment]
 model: claude-sonnet-4
-version: 1.0.0
+version: 1.1.0
 created: 2025-11-27
-updated: 2025-11-27
+updated: 2026-01-09
 tools:
   required: [Read,Write,Edit,Bash,Skill]
   optional: [Grep,Glob]
   denied: []
+hooks:
+  PreToolUse:
+    - match: "Bash"
+      once: true
+      script: |
+        if [[ "$TOOL_INPUT" != *"ansible"* ]]; then exit 0; fi
+        if ! command -v ansible &>/dev/null; then
+          echo "ERROR: ansible not found. Install: pip install ansible"
+          exit 1
+        fi
+        echo "Ansible $(ansible --version | head -1)" >&2
 examples:
   - trigger: "How do I deploy my application with Ansible?"
     response: "Load ansible skill for playbook reference. Check existing playbooks/, review deployment patterns."

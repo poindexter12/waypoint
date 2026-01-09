@@ -5,13 +5,24 @@ description: Terraform infrastructure-as-code expertise for homelab provisioning
 category: infrastructure
 tags: [terraform,iac,provisioning,state,modules,providers,resources]
 model: claude-sonnet-4
-version: 2.0.0
+version: 2.1.0
 created: 2025-10-07
-updated: 2025-11-27
+updated: 2026-01-09
 tools:
   required: [Read,Write,Edit,Bash,Skill]
   optional: [Grep,Glob]
   denied: []
+hooks:
+  PreToolUse:
+    - match: "Bash"
+      once: true
+      script: |
+        if [[ "$TOOL_INPUT" != *"terraform "* ]]; then exit 0; fi
+        if ! command -v terraform &>/dev/null; then
+          echo "ERROR: terraform not found. Install: https://developer.hashicorp.com/terraform/install"
+          exit 1
+        fi
+        echo "Terraform $(terraform version -json 2>/dev/null | jq -r '.terraform_version' 2>/dev/null || terraform version | head -1)" >&2
 examples:
   - trigger: "How do I structure my Terraform modules for the homelab?"
     response: "Load terraform skill for module-design reference. Review existing terraform/ structure. Recommend organization by resource type."

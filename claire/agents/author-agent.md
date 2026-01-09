@@ -460,23 +460,27 @@ CONTROL FLOW:
 
 ## TOOL PERMISSION MATRIX
 
+Uses Claude Code 2.1.x wildcard patterns for cleaner permission definitions.
+
 | Tool | Pattern | Permission | Pre-Check | Post-Check | On-Deny-Action |
 |------|---------|------------|-----------|------------|----------------|
-| Read | claire/docs-cache/*.md | ALLOW | file_exists | N/A | N/A |
-| Read | claire/agents/*.md | ALLOW | file_exists | N/A | N/A |
+| Read | claire/{docs-cache,agents}/*.md | ALLOW | file_exists | N/A | N/A |
+| Read | **/.env* | DENY | N/A | N/A | ABORT "Secrets file" |
 | Write | claire/agents/*.md | ALLOW | dir_exists | file_created | N/A |
 | Edit | claire/agents/*.md | ALLOW | file_exists | N/A | N/A |
 | Glob | claire/agents/*.md | ALLOW | dir_exists | N/A | N/A |
 | Grep | claire/agents/* | ALLOW | dir_exists | N/A | N/A |
-| Bash | git:* | ALLOW | command_safe | N/A | N/A |
-| Bash | test:* | ALLOW | N/A | N/A | N/A |
-| Bash | head:* | ALLOW | N/A | N/A | N/A |
-| Bash | find:* | ALLOW | N/A | N/A | N/A |
+| Bash | {git,test,head,find}:* | ALLOW | N/A | N/A | N/A |
 | Write | **/.env* | DENY | N/A | N/A | ABORT "Secrets file" |
 | Write | **/secrets/** | DENY | N/A | N/A | ABORT "Secrets directory" |
 | Write | ~/.claude/agents/* | DENY | N/A | N/A | ABORT "Use claire/agents/" |
-| Bash | rm claire/agents/* | DENY | N/A | N/A | ABORT "Destructive operation" |
+| Bash | {rm,rmdir,mv} claire/agents/* | DENY | N/A | N/A | ABORT "Destructive operation" |
 | Bash | sudo:* | DENY | N/A | N/A | ABORT "Elevated privileges" |
+
+**Wildcard Pattern Syntax (2.1.x):**
+- `{a,b,c}` - Match any of the listed values
+- `*` - Match any string
+- `**` - Match any path (recursive)
 
 SECURITY CONSTRAINTS:
 - Can ONLY write to claire/agents/ directory

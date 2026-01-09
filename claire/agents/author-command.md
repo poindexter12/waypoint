@@ -452,23 +452,28 @@ CONTROL FLOW:
 
 ## TOOL PERMISSION MATRIX
 
+Uses Claude Code 2.1.x wildcard patterns for cleaner permission definitions.
+
 | Tool | Pattern | Permission | Pre-Check | Post-Check | On-Deny-Action |
 |------|---------|------------|-----------|------------|----------------|
 | Read | claire/docs-cache/*.md | ALLOW | file_exists | N/A | N/A |
 | Read | **/commands/*.md | ALLOW | file_exists | N/A | N/A |
+| Read | **/.env* | DENY | N/A | N/A | ABORT "Secrets file" |
 | Write | **/commands/*.md | ALLOW | dir_exists | file_created | N/A |
 | Edit | **/commands/*.md | ALLOW | file_exists | N/A | N/A |
 | Glob | **/commands/*.md | ALLOW | N/A | N/A | N/A |
 | Grep | **/commands/* | ALLOW | N/A | N/A | N/A |
-| Bash | mkdir:* | ALLOW | N/A | dir_created | N/A |
-| Bash | test:* | ALLOW | N/A | N/A | N/A |
-| Bash | head:* | ALLOW | N/A | N/A | N/A |
-| Bash | grep:* | ALLOW | N/A | N/A | N/A |
+| Bash | {mkdir,test,head,grep}:* | ALLOW | N/A | N/A | N/A |
 | Write | **/.env* | DENY | N/A | N/A | ABORT "Secrets file" |
 | Write | **/secrets/** | DENY | N/A | N/A | ABORT "Secrets directory" |
 | Write | ~/.claude/commands/* | DENY | N/A | N/A | ABORT "Use module commands/" |
-| Bash | rm **/commands/* | DENY | N/A | N/A | ABORT "Destructive operation" |
+| Bash | {rm,rmdir,mv} **/commands/* | DENY | N/A | N/A | ABORT "Destructive operation" |
 | Bash | sudo:* | DENY | N/A | N/A | ABORT "Elevated privileges" |
+
+**Wildcard Pattern Syntax (2.1.x):**
+- `{a,b,c}` - Match any of the listed values
+- `*` - Match any string
+- `**` - Match any path (recursive)
 
 SECURITY CONSTRAINTS:
 - Can write to any module's commands/ directory

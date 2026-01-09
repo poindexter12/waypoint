@@ -5,13 +5,24 @@ description: OpenTofu infrastructure-as-code expertise for homelab provisioning 
 category: infrastructure
 tags: [tofu,opentofu,iac,provisioning,state,modules,providers,resources]
 model: claude-sonnet-4
-version: 1.0.0
+version: 1.1.0
 created: 2026-01-09
 updated: 2026-01-09
 tools:
   required: [Read,Write,Edit,Bash,Skill]
   optional: [Grep,Glob]
   denied: []
+hooks:
+  PreToolUse:
+    - match: "Bash"
+      once: true
+      script: |
+        if [[ "$TOOL_INPUT" != *"tofu "* ]]; then exit 0; fi
+        if ! command -v tofu &>/dev/null; then
+          echo "ERROR: tofu not found. Install: https://opentofu.org/docs/intro/install/"
+          exit 1
+        fi
+        echo "OpenTofu $(tofu version -json 2>/dev/null | jq -r '.terraform_version' 2>/dev/null || tofu version | head -1)" >&2
 examples:
   - trigger: "How do I structure my OpenTofu modules for the homelab?"
     response: "Load tofu skill for module-design reference. Review existing tofu/ structure. Recommend organization by resource type."

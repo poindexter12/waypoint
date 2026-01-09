@@ -676,32 +676,27 @@ CONTROL FLOW:
 
 ## TOOL PERMISSION MATRIX
 
+Uses Claude Code 2.1.x wildcard patterns for cleaner permission definitions.
+
 | Tool | Pattern | Permission | Pre-Check | Post-Check | On-Deny-Action |
 |------|---------|------------|-----------|------------|----------------|
-| Read | ~/.claude/plugins/*.json | ALLOW | file_exists | N/A | N/A |
-| Read | ~/.claude/plugins/**/plugin.json | ALLOW | file_exists | N/A | N/A |
-| Read | ~/.claude/plugins/**/*.md | ALLOW | file_exists | N/A | N/A |
-| Bash | test:* | ALLOW | N/A | N/A | N/A |
-| Bash | find ~/.claude/plugins/* | ALLOW | dir_exists | N/A | N/A |
-| Bash | grep:* | ALLOW | N/A | N/A | N/A |
-| Bash | cat ~/.claude/plugins/* | ALLOW | file_exists | N/A | N/A |
-| Bash | ls ~/.claude/plugins/* | ALLOW | dir_exists | N/A | N/A |
-| Bash | du:* | ALLOW | N/A | N/A | N/A |
-| Bash | git clone:* | ALLOW | user_confirmed | verify_success | N/A |
-| Bash | git pull:* | ALLOW | user_confirmed | verify_success | N/A |
-| Bash | git fetch:* | ALLOW | N/A | N/A | N/A |
-| Bash | git rev-parse:* | ALLOW | N/A | N/A | N/A |
-| Bash | git stash:* | ALLOW | N/A | N/A | N/A |
-| Bash | rm -rf ~/.claude/plugins/marketplaces/* | ALLOW | user_confirmed | verify_removed | N/A |
-| Bash | rm -rf ~/.claude/plugins/cache/* | ALLOW | user_confirmed | N/A | N/A |
-| Bash | mkdir:* | ALLOW | N/A | N/A | N/A |
-| Bash | python3 -m json.tool:* | ALLOW | N/A | N/A | N/A |
-| Glob | ~/.claude/plugins/**/*.json | ALLOW | N/A | N/A | N/A |
-| Glob | ~/.claude/plugins/**/*.md | ALLOW | N/A | N/A | N/A |
-| Grep | ~/.claude/plugins/* | ALLOW | dir_exists | N/A | N/A |
-| Bash | sudo:* | DENY | N/A | N/A | ABORT "Elevated privileges" |
+| Read | ~/.claude/plugins/**/*.{json,md} | ALLOW | file_exists | N/A | N/A |
 | Read | **/.env* | DENY | N/A | N/A | ABORT "Secrets file" |
 | Read | **/secrets/** | DENY | N/A | N/A | ABORT "Secrets directory" |
+| Bash | {test,du,mkdir}:* | ALLOW | N/A | N/A | N/A |
+| Bash | {find,grep,cat,ls} ~/.claude/plugins/* | ALLOW | dir_exists | N/A | N/A |
+| Bash | git {clone,pull}:* | ALLOW | user_confirmed | verify_success | N/A |
+| Bash | git {fetch,rev-parse,stash}:* | ALLOW | N/A | N/A | N/A |
+| Bash | rm -rf ~/.claude/plugins/{marketplaces,cache}/* | ALLOW | user_confirmed | verify_removed | N/A |
+| Bash | python3 -m json.tool:* | ALLOW | N/A | N/A | N/A |
+| Glob | ~/.claude/plugins/**/*.{json,md} | ALLOW | N/A | N/A | N/A |
+| Grep | ~/.claude/plugins/* | ALLOW | dir_exists | N/A | N/A |
+| Bash | sudo:* | DENY | N/A | N/A | ABORT "Elevated privileges" |
+
+**Wildcard Pattern Syntax (2.1.x):**
+- `{a,b,c}` - Match any of the listed values
+- `*` - Match any string
+- `**` - Match any path (recursive)
 
 SECURITY CONSTRAINTS:
 - REQUIRES user confirmation before destructive operations (rm, uninstall)
