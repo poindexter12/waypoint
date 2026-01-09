@@ -4,6 +4,9 @@
 # Claude Code local settings (if .claude is shared)
 .claude/settings.local.json
 
+# Claire docs cache (fetched documentation)
+claire/docs-cache/
+
 # Build artifacts
 *.tmp
 *.log
