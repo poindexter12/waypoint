@@ -3,6 +3,28 @@ description: Add .ai-context.json metadata to an existing worktree
 argument-hint: [--mode <mode>] [--description "<text>"]
 allowed-tools: Bash, Write, Read
 model: sonnet
+hooks:
+  PreToolUse:
+    # Verify we're in a git worktree before any operations
+    - match: "Bash"
+      script: |
+        if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+          echo "ERROR: Not in a git repository"
+          exit 1
+        fi
+      once: true
+  PostToolUse:
+    # Validate metadata JSON after write operations
+    - match: "Write"
+      script: |
+        if [[ "$TOOL_OUTPUT" == *".ai-context.json"* ]]; then
+          FILE_PATH=$(echo "$TOOL_OUTPUT" | grep -o '/[^ ]*\.ai-context\.json' | head -1)
+          if [[ -n "$FILE_PATH" ]] && [[ -f "$FILE_PATH" ]]; then
+            if ! jq empty "$FILE_PATH" 2>/dev/null; then
+              echo "WARNING: Generated .ai-context.json may have invalid JSON"
+            fi
+          fi
+        fi
 ---
 
 # /adopt:working-tree

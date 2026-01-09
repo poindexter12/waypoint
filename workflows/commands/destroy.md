@@ -3,6 +3,39 @@ description: Safely remove a git worktree and its metadata (preserves branch)
 argument-hint: <worktree-path>
 allowed-tools: Bash, Read
 model: sonnet
+hooks:
+  PreToolUse:
+    # Verify we're in a git repository
+    - match: "Bash"
+      script: |
+        if ! git rev-parse --git-dir >/dev/null 2>&1; then
+          echo "ERROR: Not in a git repository"
+          exit 1
+        fi
+      once: true
+    # Check for uncommitted changes before destructive operations
+    - match: "Bash"
+      script: |
+        # Only warn for git worktree remove commands
+        if [[ "$TOOL_INPUT" == *"git worktree remove"* ]]; then
+          WORKTREE_PATH=$(echo "$TOOL_INPUT" | grep -oE '/[^ ]+' | head -1)
+          if [[ -n "$WORKTREE_PATH" ]] && [[ -d "$WORKTREE_PATH" ]]; then
+            cd "$WORKTREE_PATH" 2>/dev/null && \
+            if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
+              echo "WARNING: Worktree has uncommitted changes"
+            fi
+          fi
+        fi
+  PostToolUse:
+    # Verify worktree was successfully removed
+    - match: "Bash"
+      script: |
+        if [[ "$TOOL_INPUT" == *"git worktree remove"* ]]; then
+          WORKTREE_PATH=$(echo "$TOOL_INPUT" | grep -oE '/[^ ]+' | head -1)
+          if [[ -n "$WORKTREE_PATH" ]] && [[ -d "$WORKTREE_PATH" ]]; then
+            echo "WARNING: Worktree directory still exists after removal attempt"
+          fi
+        fi
 ---
 
 # /destroy:working-tree
