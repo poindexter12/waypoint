@@ -3,6 +3,41 @@ name: gh-wrangler
 description: Interactive GitHub Issues management using gh CLI. Lists backlog, creates issues from templates, triages with labels, manages lifecycle (open/close/link), creates PRs with automatic issue linking. Integrates with gh-issue-templates, gh-issue-triage, and gh-issue-lifecycle skills.
 tools: Bash, Read
 model: sonnet
+hooks:
+  PreToolUse:
+    # Verify gh CLI is authenticated before any tool use
+    - match: "Bash"
+      script: |
+        # Skip auth check for non-gh commands
+        if [[ "$TOOL_INPUT" != *"gh "* ]]; then
+          exit 0
+        fi
+        # Verify gh is authenticated
+        if ! gh auth status >/dev/null 2>&1; then
+          echo "ERROR: GitHub CLI not authenticated. Run 'gh auth login' first."
+          exit 1
+        fi
+      once: true  # Only check once per session
+    # Check rate limits before API calls
+    - match: "Bash"
+      script: |
+        # Only check for gh API commands
+        if [[ "$TOOL_INPUT" != *"gh "* ]]; then
+          exit 0
+        fi
+        # Check remaining rate limit
+        REMAINING=$(gh api rate_limit --jq '.rate.remaining' 2>/dev/null || echo "unknown")
+        if [[ "$REMAINING" != "unknown" ]] && [[ "$REMAINING" -lt 10 ]]; then
+          echo "WARNING: GitHub API rate limit low ($REMAINING remaining)"
+        fi
+  PostToolUse:
+    # Log API operations for debugging
+    - match: "Bash"
+      script: |
+        # Only log gh commands
+        if [[ "$TOOL_INPUT" == *"gh "* ]]; then
+          echo "[gh-wrangler] Executed: ${TOOL_INPUT:0:100}..." >&2
+        fi
 ---
 
 # GitHub Issue Wrangler
@@ -1062,10 +1097,11 @@ Choose [1-3]:
 
 ## VERSION
 
-- Version: 1.1.0
+- Version: 1.2.0
 - Created: 2025-12-06
-- Updated: 2025-12-12
+- Updated: 2026-01-09
 - Purpose: Interactive GitHub Issues management and PR creation with automatic issue linking
 - Changelog:
+  - 1.2.0 (2026-01-09): Added Claude Code 2.1.x hooks for auth verification (PreToolUse with once:true), rate limit checking (PreToolUse), and API operation logging (PostToolUse)
   - 1.1.0 (2025-12-12): Added PR creation with automatic issue linking (STEP 9), branch name parsing, issue validation, closing keyword selection, PR-related permissions (create/list/view), new error patterns (PR_CREATE_FAILED, ISSUE_NOT_FOUND), validation checklist for PR creation, and comprehensive test scenarios (TS006-TS009) for auto-link feature
   - 1.0.0 (2025-12-06): Initial creation with full decision tree, execution protocol, error patterns, validation checklist, and test scenarios

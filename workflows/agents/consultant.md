@@ -711,29 +711,29 @@ CONTROL FLOW:
 
 ## TOOL PERMISSION MATRIX
 
+Uses Claude Code 2.1.x wildcard patterns for cleaner permission definitions.
+
 | Tool | Pattern | Permission | Pre-Check | Post-Check | On-Deny-Action |
 |------|---------|------------|-----------|------------|----------------|
-| Read | .ai-context.json | ALLOW | file_exists | N/A | N/A |
-| Read | **/.ai-context.json | ALLOW | N/A | N/A | N/A |
-| Bash | git worktree:* | ALLOW | command_safe | N/A | N/A |
-| Bash | git rev-parse:* | ALLOW | command_safe | N/A | N/A |
-| Bash | git log:* | ALLOW | command_safe | N/A | N/A |
-| Bash | git status:* | ALLOW | command_safe | N/A | N/A |
-| Bash | ls:* | ALLOW | N/A | N/A | N/A |
-| Bash | cat:* | ALLOW | N/A | N/A | N/A |
-| Bash | test:* | ALLOW | N/A | N/A | N/A |
-| Bash | wc:* | ALLOW | N/A | N/A | N/A |
-| Bash | grep:* | ALLOW | N/A | N/A | N/A |
-| Bash | find:* | ALLOW | N/A | N/A | N/A |
-| Glob | **/* | ALLOW | N/A | N/A | N/A |
-| Grep | **/* | ALLOW | N/A | N/A | N/A |
+| Read | **/.ai-context.json | ALLOW | file_exists | N/A | N/A |
+| Read | **/*.md | ALLOW | N/A | N/A | N/A |
+| Read | **/.env* | DENY | N/A | N/A | ABORT "Secrets file" |
+| Bash | git {worktree,rev-parse,log,status,branch}:* | ALLOW | command_safe | N/A | N/A |
+| Bash | {ls,cat,test,wc,grep,find,head,tail}:* | ALLOW | N/A | N/A | N/A |
+| Glob | ** | ALLOW | N/A | N/A | N/A |
+| Grep | ** | ALLOW | N/A | N/A | N/A |
 | Task | subagent_type=general-purpose | ALLOW | task_relevant | N/A | N/A |
 | Write | * | DENY | N/A | N/A | ABORT "Consultant is read-only" |
 | Edit | * | DENY | N/A | N/A | ABORT "Consultant is read-only" |
-| Bash | rm:* | DENY | N/A | N/A | ABORT "Destructive operation" |
-| Bash | git worktree remove:* | DENY | N/A | N/A | ABORT "Use /destroy:working-tree" |
-| Bash | git worktree add:* | DENY | N/A | N/A | ABORT "Use /create:working-tree" |
+| Bash | {rm,rmdir,mv}:* | DENY | N/A | N/A | ABORT "Destructive operation" |
+| Bash | git worktree {remove,add}:* | DENY | N/A | N/A | ABORT "Use working-tree commands" |
 | Bash | sudo:* | DENY | N/A | N/A | ABORT "Elevated privileges" |
+| Bash | * | DENY | N/A | N/A | ABORT "Consultant is read-only" |
+
+**Wildcard Pattern Syntax (2.1.x):**
+- `{a,b,c}` - Match any of the listed values
+- `*` - Match any string
+- `**` - Match any path (recursive)
 
 SECURITY CONSTRAINTS:
 - Consultant is STRICTLY READ-ONLY
@@ -996,11 +996,12 @@ Consultant draws from these knowledge areas:
 
 ## VERSION
 
-- Version: 3.0.0
+- Version: 3.1.0
 - Created: 2025-11-23
-- Updated: 2025-11-24 (AI optimization)
+- Updated: 2026-01-09
 - Purpose: Expert consultant for git worktree strategy and organization
 - Changelog:
+  - 3.1.0 (2026-01-09): Updated TOOL PERMISSION MATRIX to use Claude Code 2.1.x wildcard patterns for cleaner, more maintainable permissions; added explicit default deny rule; added secrets file protection
   - 3.0.0 (2025-11-24): AI optimization with INVOCATION DECISION TREE, EXECUTION PROTOCOL, ERROR PATTERNS, TEST SCENARIOS
   - 2.0.0 (2025-11-23): Complete redesign as strategic consultant agent
   - 1.0.0 (previous): Command execution agent (deprecated pattern)
