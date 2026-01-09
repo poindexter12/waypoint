@@ -1,7 +1,7 @@
 {
   "name": "workflows",
   "description": "Operational tooling for development workflows - git worktree management, GitHub issues backlog",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "repository": "https://github.com/poindexter12/waypoint",
   "license": "MIT",
   "keywords": [
