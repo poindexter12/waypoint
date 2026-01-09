@@ -3,6 +3,42 @@ description: Create a new git worktree with branch and .ai-context.json metadata
 argument-hint: <branch-name> [--mode <mode>] [--description "<text>"]
 allowed-tools: Bash, Write, Read
 model: sonnet
+hooks:
+  PreToolUse:
+    # Verify we're in a git repository before any operations
+    - match: "Bash"
+      script: |
+        if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+          echo "ERROR: Not in a git repository"
+          exit 1
+        fi
+      once: true  # Only check once at start
+  PostToolUse:
+    # Validate metadata JSON after write operations
+    - match: "Write"
+      script: |
+        # Check if this was a .ai-context.json write
+        if [[ "$TOOL_OUTPUT" == *".ai-context.json"* ]]; then
+          # Extract the file path and validate JSON
+          FILE_PATH=$(echo "$TOOL_OUTPUT" | grep -o '/[^ ]*\.ai-context\.json' | head -1)
+          if [[ -n "$FILE_PATH" ]] && [[ -f "$FILE_PATH" ]]; then
+            if ! jq empty "$FILE_PATH" 2>/dev/null; then
+              echo "WARNING: Generated .ai-context.json may have invalid JSON"
+            fi
+          fi
+        fi
+  Stop:
+    # Cleanup partially-created worktree on interrupt
+    - once: true
+      script: |
+        # Check if WORKTREE_PATH was set and directory exists but is incomplete
+        if [[ -n "${WORKTREE_PATH:-}" ]] && [[ -d "$WORKTREE_PATH" ]]; then
+          # Check if worktree was fully created (has .ai-context.json)
+          if [[ ! -f "$WORKTREE_PATH/.ai-context.json" ]]; then
+            echo "Cleaning up incomplete worktree at $WORKTREE_PATH..."
+            git worktree remove "$WORKTREE_PATH" --force 2>/dev/null || rm -rf "$WORKTREE_PATH"
+          fi
+        fi
 ---
 
 # /working-tree:new
@@ -1074,3 +1110,13 @@ Task(
   prompt='[question about worktree organization, naming, or workflow]'
 )
 ```
+
+## VERSION
+
+- Version: 1.1.0
+- Created: 2025-11-23
+- Updated: 2026-01-09
+- Purpose: Create git worktree with AI metadata
+- Changelog:
+  - 1.1.0 (2026-01-09): Added Claude Code 2.1.x hooks - PreToolUse for git repo validation (once:true), PostToolUse for JSON validation, Stop hook for cleanup on interrupt
+  - 1.0.0 (2025-11-23): Initial creation with full execution protocol, error patterns, and test cases
