@@ -6,6 +6,7 @@ description: |
   configurations (.tf files), running terraform commands, troubleshooting state
   issues, or designing modules. Includes Telmate Proxmox provider patterns.
   Triggers: terraform, tfstate, .tf files, HCL, modules, providers, proxmox_vm_qemu.
+agent: terraform-expert
 ---
 
 # Terraform Skill

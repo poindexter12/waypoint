@@ -5,6 +5,7 @@ description: |
   Includes Proxmox VE and Docker integration via community.general and community.docker collections.
   Use when writing playbooks, troubleshooting Ansible runs, or designing automation workflows.
   Triggers: ansible, playbook, inventory, role, task, handler, vars, jinja2, galaxy, proxmox_kvm, proxmox_lxc, docker_container, docker_compose.
+agent: ansible-expert
 ---
 
 # Ansible Skill
