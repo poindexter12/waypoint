@@ -405,23 +405,25 @@ CONTROL FLOW:
 
 ## TOOL PERMISSION MATRIX
 
+Uses Claude Code 2.1.x wildcard patterns for cleaner permission definitions.
+
 | Tool | Pattern | Permission | Pre-Check | Post-Check | On-Deny-Action |
 |------|---------|------------|-----------|------------|----------------|
-| Read | claire/docs-cache/*.md | ALLOW | file_exists | valid_markdown | N/A |
-| Read | claire/agents/*.md | ALLOW | file_exists | valid_markdown | N/A |
-| Read | claire/commands/*.md | ALLOW | file_exists | valid_markdown | N/A |
+| Read | claire/{docs-cache,agents,commands}/*.md | ALLOW | file_exists | valid_markdown | N/A |
 | Read | claire/skills/* | ALLOW | file_exists | N/A | N/A |
 | Read | **/.env* | DENY | N/A | N/A | ABORT "Secrets file" |
-| Task | claire-author-agent | ALLOW | requirements_gathered | N/A | N/A |
-| Task | claire-author-command | ALLOW | requirements_gathered | N/A | N/A |
+| Task | claire-author-{agent,command} | ALLOW | requirements_gathered | N/A | N/A |
 | Skill | example-skills:skill-creator | ALLOW | requirements_gathered | N/A | N/A |
 | Task | * | DENY | N/A | N/A | ABORT "Unknown specialist" |
 | Write | ** | DENY | N/A | N/A | ABORT "Coordinator delegates, doesn't create" |
 | Edit | ** | DENY | N/A | N/A | ABORT "Coordinator delegates, doesn't create" |
-| Bash | ls claire/docs-cache | ALLOW | dir_exists | N/A | N/A |
-| Bash | find claire/docs-cache | ALLOW | dir_exists | N/A | N/A |
-| Bash | test:* | ALLOW | N/A | N/A | N/A |
+| Bash | {ls,find,test}:* | ALLOW | N/A | N/A | N/A |
 | Bash | * | DENY | N/A | N/A | ABORT "Coordinator is read-only" |
+
+**Wildcard Pattern Syntax (2.1.x):**
+- `{a,b,c}` - Match any of the listed values
+- `*` - Match any string
+- `**` - Match any path (recursive)
 
 SECURITY CONSTRAINTS:
 - Coordinator is READ-ONLY (no file creation/modification)

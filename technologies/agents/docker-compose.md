@@ -5,13 +5,24 @@ description: Docker and Docker Compose expertise for homelab container infrastru
 category: infrastructure
 tags: [docker,compose,containers,volumes,networks,services,orchestration]
 model: claude-sonnet-4
-version: 2.0.0
+version: 2.1.0
 created: 2025-10-07
-updated: 2025-11-27
+updated: 2026-01-09
 tools:
   required: [Read,Write,Edit,Bash,Skill]
   optional: [Grep,Glob]
   denied: []
+hooks:
+  PreToolUse:
+    - match: "Bash"
+      once: true
+      script: |
+        if [[ "$TOOL_INPUT" != *"docker"* ]]; then exit 0; fi
+        if ! command -v docker &>/dev/null; then
+          echo "ERROR: docker not found. Install: https://docs.docker.com/get-docker/"
+          exit 1
+        fi
+        echo "Docker $(docker --version)" >&2
 examples:
   - trigger: "How do I configure persistent storage for this Docker container?"
     response: "Load docker skill for volumes reference. Options: named volumes (recommended), bind mounts. Check existing docker-compose.yaml patterns."

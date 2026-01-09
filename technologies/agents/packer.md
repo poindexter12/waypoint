@@ -5,13 +5,24 @@ description: HashiCorp Packer expertise for building machine images and template
 category: infrastructure
 tags: [packer,images,templates,ami,proxmox,vmware,cloud-init]
 model: claude-sonnet-4
-version: 1.0.0
+version: 1.1.0
 created: 2026-01-09
 updated: 2026-01-09
 tools:
   required: [Read,Write,Edit,Bash,Skill]
   optional: [Grep,Glob]
   denied: []
+hooks:
+  PreToolUse:
+    - match: "Bash"
+      once: true
+      script: |
+        if [[ "$TOOL_INPUT" != *"packer "* ]]; then exit 0; fi
+        if ! command -v packer &>/dev/null; then
+          echo "ERROR: packer not found. Install: https://developer.hashicorp.com/packer/install"
+          exit 1
+        fi
+        echo "Packer $(packer version)" >&2
 examples:
   - trigger: "How do I create a Proxmox VM template with Packer?"
     response: "Load packer skill for proxmox builder reference. Check existing packer/*.pkr.hcl for patterns."
