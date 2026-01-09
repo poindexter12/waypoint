@@ -1,11 +1,13 @@
 {
   "name": "technologies",
-  "description": "Domain knowledge for infrastructure technologies - Terraform, Ansible, Docker, Proxmox",
-  "version": "1.0.0",
+  "description": "Domain knowledge for infrastructure technologies - Terraform, OpenTofu, Packer, Ansible, Docker, Proxmox",
+  "version": "1.1.0",
   "repository": "https://github.com/poindexter12/waypoint",
   "license": "MIT",
   "keywords": [
     "terraform",
+    "opentofu",
+    "packer",
     "ansible",
     "docker",
     "proxmox",
@@ -14,11 +16,15 @@
   "agents": [
     "./agents/ansible.md",
     "./agents/docker-compose.md",
+    "./agents/packer.md",
     "./agents/proxmox.md",
-    "./agents/terraform.md"
+    "./agents/terraform.md",
+    "./agents/tofu.md"
   ],
   "skills": [
     "./skills/terraform",
+    "./skills/tofu",
+    "./skills/packer",
     "./skills/ansible",
     "./skills/docker",
     "./skills/proxmox",

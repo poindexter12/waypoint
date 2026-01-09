@@ -6,6 +6,7 @@ description: |
   Use when working with docker-compose.yaml, Dockerfiles, troubleshooting containers,
   or planning container architecture.
   Triggers: docker, compose, container, dockerfile, volume, network, service, lxc.
+agent: docker-compose-expert
 ---
 
 # Docker Skill

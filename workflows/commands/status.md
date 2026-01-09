@@ -2,6 +2,16 @@
 description: Show metadata for the current git worktree from .ai-context.json
 allowed-tools: Bash, Read
 model: sonnet
+hooks:
+  PreToolUse:
+    # Verify we're in a git repository before checking status
+    - match: "Bash"
+      script: |
+        if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+          echo "ERROR: Not in a git repository"
+          exit 1
+        fi
+      once: true
 ---
 
 # /working-tree:status

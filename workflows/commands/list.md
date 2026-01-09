@@ -2,6 +2,16 @@
 description: List all git worktrees with their associated .ai-context metadata
 allowed-tools: Bash, Read, Glob
 model: sonnet
+hooks:
+  PreToolUse:
+    # Verify we're in a git repository before listing
+    - match: "Bash"
+      script: |
+        if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+          echo "ERROR: Not in a git repository"
+          exit 1
+        fi
+      once: true
 ---
 
 # /list:working-tree
