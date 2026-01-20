@@ -141,7 +141,7 @@ Isolated i18n work for specific locale.
 
 ## Supporting Files
 
-- **REFERENCE.md**: Comprehensive guide with detailed best practices, naming conventions, workflows, and advanced patterns
+- **references/best-practices.md**: Comprehensive guide with detailed best practices, naming conventions, workflows, and advanced patterns
 - **templates/ai-context.json.template**: Copy-paste template for manual metadata creation
 - **templates/README.working-tree.template**: Template for worktree README
 
@@ -163,7 +163,7 @@ Isolated i18n work for specific locale.
 ## For More Detail
 
 **Comprehensive Guide:**
-Ask to see `REFERENCE.md` for:
+Ask to see `references/best-practices.md` for:
 - Detailed mode usage guidelines
 - Naming conventions and patterns
 - Multi-worktree organization strategies

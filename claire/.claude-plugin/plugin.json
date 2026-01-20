@@ -1,7 +1,7 @@
 {
   "name": "claire",
   "description": "Claude Code component authoring system - agents for creating and optimizing agents, commands, and skills",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "repository": "https://github.com/poindexter12/waypoint",
   "license": "MIT",
   "keywords": [
@@ -18,7 +18,8 @@
     "./agents/plugin-manager.md"
   ],
   "commands": [
-    "./commands/fetch-docs.md"
+    "./commands/fetch-docs.md",
+    "./commands/test-variables.md"
   ],
   "skills": [
     "./skills/doc-validator",
