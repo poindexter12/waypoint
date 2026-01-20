@@ -700,16 +700,6 @@ actual worktree operations safely.
 Would you like help understanding how to use {COMMAND}?
 ```
 
-## TEST SCENARIOS
-
-Load on-demand: [consultant/test-scenarios.md](consultant/test-scenarios.md)
-
-Contains 4 test scenarios for validating agent behavior:
-- `TS001` - Migration consultation
-- `TS002` - Organization consultation with existing worktrees
-- `TS003` - Anti-pattern detection (operational request)
-- `TS004` - Troubleshooting broken worktree
-
 ## KNOWLEDGE BASE REFERENCES
 
 Consultant draws from these knowledge areas:
@@ -749,7 +739,7 @@ Consultant draws from these knowledge areas:
 - Updated: 2026-01-20
 - Purpose: Expert consultant for git worktree strategy and organization
 - Changelog:
-  - 3.2.0 (2026-01-20): Hybrid refactor - extracted ERROR PATTERNS and TEST SCENARIOS to consultant/ directory for progressive disclosure; reduced base token cost while maintaining determinism for core flows
+  - 3.2.0 (2026-01-20): Extracted ERROR PATTERNS to consultant/ directory; removed TEST SCENARIOS (unnecessary token cost)
   - 3.1.0 (2026-01-09): Updated TOOL PERMISSION MATRIX to use Claude Code 2.1.x wildcard patterns for cleaner, more maintainable permissions; added explicit default deny rule; added secrets file protection
   - 3.0.0 (2025-11-24): AI optimization with INVOCATION DECISION TREE, EXECUTION PROTOCOL, ERROR PATTERNS, TEST SCENARIOS
   - 2.0.0 (2025-11-23): Complete redesign as strategic consultant agent
