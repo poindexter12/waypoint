@@ -66,4 +66,4 @@ description: Validate documentation files for completeness, accuracy, and consis
 
 ## Supporting Files
 
-For detailed validation rules, see [REFERENCE.md](REFERENCE.md).
+For detailed validation rules, see [references/validation-rules.md](references/validation-rules.md).
